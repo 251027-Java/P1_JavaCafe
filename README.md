@@ -4,9 +4,9 @@ A full-stack bakery menu application built with Java, React, PostgreSQL, and Tai
 
 ## Project Overview
 
-- Converting from ice cream P0 project to bakery menu
-- 3 pages: main, menu, place order
-- Products: cake, croissants, cupcakes, cookies
+- Converting from ice cream P0 project to cafe menu
+- 4 main customer pages: Menu, Place Order, Lookup Order, and a hidden Admin page
+- Products: coffee, croissants, cupcakes, cookies
 
 ## Tech Stack
 
@@ -21,7 +21,8 @@ A full-stack bakery menu application built with Java, React, PostgreSQL, and Tai
 JavaCafe/
 ├── src/
 │   ├── main/java/org/example/
-│   │   ├── Main.java
+│   │   ├── JavaCafeApplication.java
+│   │   ├── Controller/     # Handles HTTP requests and responses, defines REST API endpoints
 │   │   ├── Model/          # Domain models
 │   │   ├── Repository/     # Data access layer
 │   │   └── Service/        # Business logic
