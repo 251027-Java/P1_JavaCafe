@@ -1,6 +1,6 @@
 # Java Cafe
 
-A full-stack bakery menu application built with Java, React, PostgreSQL, and Tailwind CSS.
+A full-stack cafe menu application built with Java, React, PostgreSQL, and Tailwind CSS.
 
 ## Project Overview
 

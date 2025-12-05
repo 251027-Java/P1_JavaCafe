@@ -61,4 +61,6 @@ Admin Stories:
 6.	View Sales Summary
         As an admin, I want to see a sales summary showing date, total orders, and total items sold, so I can monitor business performance.
 
->>>>>>> Stashed changes
+7.      Browser View Changed
+        As as admin presses "Admin login" button on on any main page, all the pages including: menu, place order, and order lookup are disapear. And a new admin page with login is prompted only on the browser now.
+
