@@ -8,7 +8,6 @@ import java.math.BigDecimal;
 
 @Entity
 @Table(name = "Products", uniqueConstraints = {
-        // This defines a constraint named 'unique_name_description' that spans two columns.
         @UniqueConstraint(columnNames = {"name", "description"})
 })
 @Data

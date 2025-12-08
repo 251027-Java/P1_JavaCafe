@@ -9,7 +9,6 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "SalesSummary", uniqueConstraints = {
-        // If you intended to make the 'date' column unique:
         @UniqueConstraint(columnNames = {"date"})
 
 })
