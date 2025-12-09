@@ -2,6 +2,7 @@ package com.project1.JavaCafe.Model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
@@ -17,7 +18,7 @@ public class Products {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long productId;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String category;
 
     @Column(nullable = false)
