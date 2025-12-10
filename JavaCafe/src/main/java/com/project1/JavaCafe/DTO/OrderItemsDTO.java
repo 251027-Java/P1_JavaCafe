@@ -2,7 +2,6 @@ package com.project1.JavaCafe.DTO;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
 
 /*
  @Id
@@ -24,11 +23,11 @@ import java.util.List;
     private String status;
 * */
 
-public record CustomerOrdersDTO (
+public record OrderItemsDTO(
+        Integer itemId,
         Integer orderId,
-        Long userId,
-        BigDecimal totalCost,
-        LocalDate orderDate,
-        String status,
-        List<OrderItemsDTO> items
+        Long productId,
+        Integer Quantity,
+        BigDecimal unitPrice,
+        String ProductName
 ) {}

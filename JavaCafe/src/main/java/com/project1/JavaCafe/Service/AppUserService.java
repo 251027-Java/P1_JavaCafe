@@ -42,6 +42,23 @@ public class AppUserService {
         );
     }
 
+//    public void initializeTable() {
+//        // Use count() to check if the table has any records
+//        if(repository.count() == 0) {
+//
+//            // Create a properly initialized Products entity with necessary data
+//            Products espresso = new Products(
+//                    "COFFEE",
+//                    "Java House Espresso",
+//                    new java.math.BigDecimal("3.00"),
+//                    "A rich, single-origin shot, perfectly pulled. Bold and balanced.",
+//                    "IN_STOCK"
+//            );
+//
+//            // Use the standard JPA save() method
+//            repository.save(espresso);
+//    }
+
     public Long getUserIdAfterLogin(String email) {
 
         // 1. Fetch the user object from the database using the unique email

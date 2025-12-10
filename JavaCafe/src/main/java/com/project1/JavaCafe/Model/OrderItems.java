@@ -2,6 +2,7 @@ package com.project1.JavaCafe.Model;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.util.List;
 
 
 import lombok.Data;
@@ -32,6 +33,7 @@ public class OrderItems {
 
     @Column(name = "unitPrice", nullable = false)
     private BigDecimal unitPrice;
+
 
 
     public OrderItems(CustomerOrders order, Products product, int quantity, BigDecimal unitPrice) {

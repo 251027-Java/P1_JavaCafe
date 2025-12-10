@@ -2,13 +2,13 @@ package com.project1.JavaCafe.DTO;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
+import java.time.LocalDateTime;
 
-public record CustomerOrdersWOIDDTO (
-        String email,
+public record CustomerOrdersSummaryDTO(
+        Integer orderId,
         Long userId,
         BigDecimal totalCost,
         LocalDate orderDate,
-        String status,
-        List<OrderItemsWOIDDTO> items
+        String status
+        // NO items list here
 ) {}
