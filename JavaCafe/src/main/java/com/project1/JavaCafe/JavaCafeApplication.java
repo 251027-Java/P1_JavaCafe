@@ -35,9 +35,25 @@ public class JavaCafeApplication {
         // Bean is a single method that is run after the application is started
         @Bean
         CommandLineRunner seedData(ProductsService productsService, AppUserRepository appUserRepository, PasswordEncoder passwordEncoder) {
-            return args -> { // <-- Start of lambda
+            return args -> {
                 // Spring safely calls the service method here after everything is ready
                 productsService.initializeTable();
+
+                // ADD ADMIN USER LOGIC
+                if (appUserRepository.findByEmail("admin.user@cafe.com").isEmpty()) {
+
+                    String adminHashedPassword = passwordEncoder.encode("adminpassword1");
+
+                    AppUser adminUser = new AppUser(
+                            "admin.user@cafe.com",
+                            adminHashedPassword,
+                            "ADMIN", // Set role to ADMIN
+                            "Cafe",
+                            "Admin"
+                    );
+                    appUserRepository.save(adminUser);
+                    System.out.println("--- Created Admin Profile ---");
+                }
 
                 // Check if a test user exists to prevent duplicates
                 if (appUserRepository.findByEmail("test.user@cafe.com").isEmpty()) {

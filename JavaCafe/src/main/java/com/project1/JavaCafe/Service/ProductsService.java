@@ -5,7 +5,11 @@ import com.project1.JavaCafe.Model.Products;
 //import com.project1.JavaCafe.DTO.ProductsDTO;
 import com.project1.JavaCafe.DTO.ProductsDTO;
 import com.project1.JavaCafe.Repository.ProductsRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
 
 @Service
 public class ProductsService {
@@ -35,6 +39,62 @@ public class ProductsService {
                 product.getDescription(), // 5
                 product.getAvailability() // 6
         );
+    }
+
+    public List<ProductsDTO> getAllProducts() {
+        // the repo method returns a list of expenses...
+        // we need to convert every expense on the list to a DTO...
+        // keep/put back in a list to return
+        return repository.findAll().stream().map(this::ProductsToDto).toList();
+    }
+
+    /*
+        Long productId,
+        String category,
+        String name,
+        BigDecimal basePrice,
+        String description,
+        String availability
+     */
+
+    public ProductsDTO update(Long id, ProductsDTO dto) {
+
+        // 1. Find the existing product entity by ID. Throws 404 if not found.
+        Products product = repository.findById(id)
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found with ID: " + id)
+                );
+
+        // 2. Update the fields of the retrieved 'product' entity using the 'dto' fields
+
+        // Check if the DTO field is not null before setting (optional, but good practice for PATCH-like updates)
+        if (dto.category() != null) {
+            product.setCategory(dto.category());
+        }
+
+        if (dto.name() != null) {
+            product.setName(dto.name());
+        }
+
+        if (dto.basePrice() != null) {
+            product.setBasePrice(dto.basePrice());
+        }
+
+        if (dto.description() != null) {
+            product.setDescription(dto.description());
+        }
+
+        // Assuming availability is either a String or an Enum
+        if (dto.availability() != null) {
+            product.setAvailability(dto.availability());
+        }
+
+        // 3. Save the updated entity back to the database.
+        Products updatedProduct = repository.save(product);
+
+        // 4. Convert the saved entity back to the DTO without ID for the response.
+        // NOTE: Replace 'ProductToDto' with your actual conversion method name.
+        return ProductsToDto(updatedProduct);
     }
 
     public void initializeTable() {

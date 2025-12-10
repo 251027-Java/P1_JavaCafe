@@ -1,0 +1,43 @@
+package com.project1.JavaCafe;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+public class WebConfig implements WebMvcConfigurer {
+    // Fields
+    //private final BasicAuthInterceptor basicAuthInterceptor;
+    private final JwtInterceptor jwtInterceptor;
+
+    // Constructor
+    // public WebConfig(BasicAuthInterceptor bai) {
+    //     this.basicAuthInterceptor = bai;
+    // }
+    public WebConfig(JwtInterceptor jwti) {
+        this.jwtInterceptor = jwti;
+    }
+
+    // Method
+    // @Override
+    // public void addInterceptors(InterceptorRegistry reg) {
+    //     // adding interceptors to the list of active/running interceptors
+    //     // that are scanning requests as they come in
+    //     reg.addInterceptor(basicAuthInterceptor)
+    //             .addPathPatterns("/api/**")
+    //             .excludePathPatterns("/api/hello");
+    // }
+    @Override
+    public void addInterceptors(InterceptorRegistry reg) {
+        // adding interceptors to the list of active/running interceptors
+        // that are scanning requests as they come in
+        reg.addInterceptor(jwtInterceptor)
+                .addPathPatterns("/api/**") // Apply to all /api/ paths
+
+                // EXCLUSION: Allow login without a token
+                .excludePathPatterns("/api/auth/login")
+
+                // EXCLUSION: Allow the menu page without a token
+                .excludePathPatterns("/api/menu"); // Excludes all methods (GET, POST, etc.) for this path
+    }
+}
