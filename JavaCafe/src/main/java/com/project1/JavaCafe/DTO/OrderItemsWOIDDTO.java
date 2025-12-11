@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 public record OrderItemsWOIDDTO(
         Integer orderId,
-        Integer productId,
+        Long productId,
         Integer quantity,
         BigDecimal unitPrice,
         String ProductName

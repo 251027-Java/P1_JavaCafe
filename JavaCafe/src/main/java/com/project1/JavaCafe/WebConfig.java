@@ -1,6 +1,7 @@
 package com.project1.JavaCafe;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -14,7 +15,6 @@ public class WebConfig implements WebMvcConfigurer {
         this.jwtInterceptor = jwti;
     }
 
-    // Method
     @Override
     public void addInterceptors(InterceptorRegistry reg) {
         // adding interceptors to the list of active/running interceptors
@@ -23,9 +23,18 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/api/**") // Apply to all /api/ paths
 
                 // EXCLUSION: Allow login without a token
-                .excludePathPatterns("/api/auth/login")
+                .excludePathPatterns("/api/auth/login", "/api/auth/register")
 
                 // EXCLUSION: Allow the menu page without a token
-                .excludePathPatterns("/api/menu"); // Excludes all methods (GET, POST, etc.) for this path
+                .excludePathPatterns("/api/menu", "/api/menu/**"); // Excludes all methods (GET, POST, etc.) for this path
+    }
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/api/**") // Apply CORS rules to all paths starting with /api
+                .allowedOrigins("http://localhost:5174") // <-- **CRITICAL LINE**
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Allow all necessary HTTP methods
+                .allowedHeaders("*") // Allow all request headers
+                .allowCredentials(true);
     }
 }
