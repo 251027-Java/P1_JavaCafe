@@ -15,7 +15,7 @@ function HomePage() {
             id: 2,
             image: 'https://images.unsplash.com/photo-1600093463592-8e36ae95ef56?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Y29mZmVlJTIwc2hvcHxlbnwwfHwwfHx8MA%3D%3D',
             title: 'Multiple Locations',
-            description: 'Visit one of our many DFW locations! With shops in Plano, Mckinney, Allen, Frisco, and Lewisville we aim to provide you with delicious treats no matter where you go!! '
+            description: 'Visit one of our many DFW locations! With shops in Plano, Euless, Allen, Frisco, and Flower Mound we aim to provide you with delicious treats no matter where you go!! '
         },
         {
             id: 3,
