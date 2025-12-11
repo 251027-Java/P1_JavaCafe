@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 
 @Entity
@@ -20,7 +21,7 @@ public class SalesSummary {
     private Long summaryId;
 
     @Column(nullable = false, unique = true)
-    private LocalDate date;
+    private LocalDateTime date;
 
     @Column(nullable = false)
     private int totalOrders;
@@ -30,7 +31,7 @@ public class SalesSummary {
 
 
     // Constructor for creating sales summaries
-    public SalesSummary(LocalDate date, int totalOrders, int totalItemsSold) {
+    public SalesSummary(LocalDateTime date, int totalOrders, int totalItemsSold) {
         this.date = date;
         this.totalOrders = totalOrders;
         this.totalItemsSold = totalItemsSold;

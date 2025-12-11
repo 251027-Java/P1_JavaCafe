@@ -1,9 +1,9 @@
 package com.project1.JavaCafe.Service;
 
-import com.project1.JavaCafe.DTO.ProductsWOIDDTO;
+import com.project1.JavaCafe.DTO.*;
+import com.project1.JavaCafe.Model.CustomerOrders;
 import com.project1.JavaCafe.Model.Products;
 //import com.project1.JavaCafe.DTO.ProductsDTO;
-import com.project1.JavaCafe.DTO.ProductsDTO;
 import com.project1.JavaCafe.Repository.ProductsRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,19 @@ public class ProductsService {
     }
 
     // Methods
+    private MenuProductsDTO productToMenuDto(Products product) {
 
+        // No logic here to map order.getOrderItems()
+
+        return new MenuProductsDTO(
+                product.getProductId(),
+                product.getCategory(),
+                product.getName(),
+                product.getBasePrice(),
+                product.getAvailability()
+                // No item list passed here
+        );
+    }
 
 
     public ProductsDTO create(ProductsWOIDDTO dto) {
@@ -47,6 +59,50 @@ public class ProductsService {
         // keep/put back in a list to return
         return repository.findAll().stream().map(this::ProductsToDto).toList();
     }
+
+    private MenuProductsDTO ProductToMenuDto(Products product) {
+        return new MenuProductsDTO(
+                // Mapping Fields from Entity to DTO:
+
+                // 1. Category
+                product.getProductId(),
+                product.getCategory(),
+
+                // 2. Name
+                product.getName(),
+
+                // 3. Base Price
+                product.getBasePrice(),
+
+                // 4. Availability
+                product.getAvailability()
+
+                // Fields Omitted (e.g., productId, description, internalCost)
+        );
+    }
+
+    public List<MenuProductsDTO> getAllMenuProducts() {
+        // the repo method returns a list of expenses...
+        // we need to convert every expense on the list to a DTO...
+        // keep/put back in a list to return
+        List<Products> productsList = repository.findAll();
+
+        return repository.findAll().stream().map(this::ProductToMenuDto).toList();
+    }
+
+    public MenuDescriptionDTO getProductDescription(Long productId) {
+
+        // Find the product by ID or throw a 404 NOT FOUND exception
+        Products product = repository.findById(productId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Product not found with ID: " + productId)
+                );
+
+        // Map only the description field into the new DTO
+        return new MenuDescriptionDTO(product.getDescription());
+    }
+
 
     /*
         Long productId,
