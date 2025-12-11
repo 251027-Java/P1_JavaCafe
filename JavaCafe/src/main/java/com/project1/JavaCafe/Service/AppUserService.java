@@ -1,9 +1,6 @@
 package com.project1.JavaCafe.Service;
 
-import com.project1.JavaCafe.DTO.AppUserDTO;
-import com.project1.JavaCafe.DTO.AppUserWOIDDTO;
-import com.project1.JavaCafe.DTO.ProductsDTO;
-import com.project1.JavaCafe.DTO.ProductsWOIDDTO;
+import com.project1.JavaCafe.DTO.*;
 import com.project1.JavaCafe.Model.AppUser;
 import com.project1.JavaCafe.Model.Products;
 import com.project1.JavaCafe.Repository.AppUserRepository;
@@ -42,22 +39,29 @@ public class AppUserService {
         );
     }
 
-//    public void initializeTable() {
-//        // Use count() to check if the table has any records
-//        if(repository.count() == 0) {
-//
-//            // Create a properly initialized Products entity with necessary data
-//            Products espresso = new Products(
-//                    "COFFEE",
-//                    "Java House Espresso",
-//                    new java.math.BigDecimal("3.00"),
-//                    "A rich, single-origin shot, perfectly pulled. Bold and balanced.",
-//                    "IN_STOCK"
-//            );
-//
-//            // Use the standard JPA save() method
-//            repository.save(espresso);
-//    }
+    public AppUserDTO registerNewCustomer(RegisterCustomerDTO dto) {
+        // 1. Business Logic: Check if email already exists
+        if (repository.findByEmail(dto.email()).isPresent()) {
+            throw new IllegalArgumentException("Email already in use.");
+        }
+
+        // 2. Security: HASH the raw password before creating the entity
+        String hashedPassword = passwordEncoder.encode(dto.password());
+
+        // 3. Create the entity, HARDCODING the role for security
+        AppUser user = new AppUser(
+                dto.email(),
+                hashedPassword,
+                "CUSTOMER", // ROLE HARDCODED BY THE SERVER - SECURE!
+                dto.firstName(),
+                dto.lastName()
+        );
+
+        // 4. Save and return DTO
+        return AppUserToDto(repository.save(user));
+    }
+
+
 
     public Long getUserIdAfterLogin(String email) {
 
