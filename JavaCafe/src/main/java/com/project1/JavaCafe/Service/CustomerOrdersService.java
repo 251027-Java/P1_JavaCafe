@@ -20,6 +20,13 @@ import java.util.List;        // Ensure this import is present
 import java.util.Optional;
 import java.util.stream.Collectors; // <-- NEW Import
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;   // Ensure this import is present
+import java.util.List;        // Ensure this import is present
+import java.util.Optional;
+import java.util.stream.Collectors; // <-- NEW Import
+
 @Service
 public class CustomerOrdersService {
     // Fields
