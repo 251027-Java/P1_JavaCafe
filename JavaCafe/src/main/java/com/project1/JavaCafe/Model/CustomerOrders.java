@@ -3,6 +3,7 @@ package com.project1.JavaCafe.Model;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Data;
@@ -34,14 +35,15 @@ public class CustomerOrders {
     @Column(name = "status", nullable = false)
     private String status;
 
-    // NEW FIELD: This establishes the one-to-many relationship in Java.
-    // It tells Hibernate: "One CustomerOrder can have Many OrderItems."
     @OneToMany(
-            mappedBy = "order", // This must match the field name in the OrderItem entity (e.g., private CustomerOrders order;)
-            cascade = CascadeType.ALL, // If the order is deleted, delete all items associated with it.
-            fetch = FetchType.LAZY     // Items are only loaded when explicitly requested (good for performance).
+            mappedBy = "order",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY,
+            orphanRemoval = true // Good practice for OneToMany relationships with CascadeType.ALL
     )
-    private List<OrderItems> orderItems;
+    // --- THE FIX IS HERE ---
+    // Initialize the list to an empty ArrayList to prevent NullPointerException
+    private List<OrderItems> orderItems = new ArrayList<>();
 
 
 

@@ -9,7 +9,16 @@ import com.project1.JavaCafe.Repository.AppUserRepository;
 import com.project1.JavaCafe.Repository.CustomerOrdersRepository;
 import com.project1.JavaCafe.Repository.OrderItemsRepository;
 import com.project1.JavaCafe.Repository.ProductsRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;   // Ensure this import is present
+import java.util.List;        // Ensure this import is present
+import java.util.Optional;
+import java.util.stream.Collectors; // <-- NEW Import
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -38,22 +47,19 @@ public class CustomerOrdersService {
     // The method takes the order details DTO AND the userId (a Long)
     public CustomerOrdersDTO create(CustomerOrdersWOIDDTO dto, Long userId) {
 
-        // 1. Fetch the AppUser profile
+        // 1. Fetch AppUser
         AppUser user = ARepo.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
 
-        // 2. Initialize total cost calculation
         BigDecimal calculatedTotalCost = BigDecimal.ZERO;
-
-        // ... (Steps 3 & 4: Order item loop and total calculation remain the same) ...
         List<OrderItems> orderItemsToSave = new ArrayList<>();
 
+        // ... (Loop remains the same: calculates cost and creates OrderItems entity) ...
         for (OrderItemsWOIDDTO itemDto : dto.items()) {
-            // ... (product lookup, price calculation, and adding to orderItemsToSave) ...
-            Products product = PRepo.findProductIdByName(itemDto.ProductName());
-            if (product == null) {
-                throw new RuntimeException("Product not found: " + itemDto.ProductName());
-            }
+            // ... (product lookup, price calculation) ...
+            Products product = PRepo.findById(itemDto.productId())
+                    .orElseThrow(() -> new RuntimeException("Product not found with ID: " + itemDto.productId()));
+            // ... (exception handling) ...
 
             BigDecimal unitPrice = product.getBasePrice();
             BigDecimal lineItemCost = unitPrice.multiply(BigDecimal.valueOf(itemDto.quantity()));
@@ -68,30 +74,38 @@ public class CustomerOrdersService {
             orderItemsToSave.add(item);
         }
 
-        // 5. Create the CustomerOrders entity, using the CALCULATED total and default status.
-
-        // Define the default status constant
+        // 5. Create the CustomerOrders entity
         String DEFAULT_STATUS = "PENDING";
         LocalDate creationDate = LocalDate.now();
 
         CustomerOrders order = new CustomerOrders(
                 user,
-                calculatedTotalCost, //Use the calculated total cost
+                calculatedTotalCost,
                 creationDate,
-                DEFAULT_STATUS //Always set the status to PENDING
+                DEFAULT_STATUS
         );
 
-        // 6. Save the parent CustomerOrders entity to generate the orderId
+        // --- CRITICAL FIX START: Link child entities to the parent entity ---
+
+        for (OrderItems item : orderItemsToSave) {
+            // 1. Set the Bi-directional link from child to parent (sets the FK)
+            item.setOrder(order);
+
+            // 2. Add the child to the parent's collection (updates the parent's in-memory list)
+            // Since you are using Lombok @Data, you might not have an add method, so use the setter:
+            order.getOrderItems().add(item); // <-- Assumes the list is initialized (your previous fix)
+        }
+
+        // 6. Save the parent entity ONLY. The items are saved automatically via CASCADE.
+        // This transaction saves the CustomerOrders and all linked OrderItems.
         CustomerOrders savedOrder = CRepo.save(order);
 
-        // 7. Save all the OrderItems, linking them to the savedOrder
-        for (OrderItems item : orderItemsToSave) {
-            item.setOrder(savedOrder);
-            IRepo.save(item);
-        }
+        // 7. Remove item saving loop (IRepo.save is no longer needed)
+        // The savedOrder object now contains the full and correct orderItems list in memory.
 
         return orderToDetailDto(savedOrder);
     }
+
     private OrderItemsDTO OrderItemsToDto(OrderItems item) {
         // Requires OrderItemsDTO to be defined as a record:
         // public record OrderItemsDTO(Integer productId, String productName, Integer quantity, BigDecimal unitPrice) {}
@@ -143,6 +157,54 @@ public class CustomerOrdersService {
                 order.getStatus()
                 // No item list passed here
         );
+    }
+
+    public CustomerOrdersSummaryDTO update(Integer id, CustomerOrdersSummaryDTO dto) { // Note the DTO change
+
+        // 1. Find the existing order entity by ID.
+        // Ensure CRepo is JpaRepository<CustomerOrders, Integer>
+        CustomerOrders order = CRepo.findById(id)
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found with ID: " + id)
+                );
+
+        // 2. Apply updates using null checks (PATCH logic)
+
+        // Check 1: Update Status (Most common for orders)
+        if (dto.status() != null) {
+            order.setStatus(dto.status());
+        }
+
+        // Check 2: Update Total Cost (If total calculation needs manual override)
+        if (dto.totalCost() != null) {
+            order.setTotalCost(dto.totalCost());
+        }
+
+        // Check 3: Update Order Date (If required, though rare)
+        if (dto.orderDate() != null) {
+            order.setOrderDate(dto.orderDate());
+        }
+
+        // 3. Save the updated entity back to the database.
+        CustomerOrders updatedOrder = CRepo.save(order); // Save the order entity
+
+        // 4. Convert the saved entity back to the DTO for the response.
+        // NOTE: You need to use your OrderToSummaryDto conversion method here.
+        return orderToSummaryDto(updatedOrder); // Replace with your actual conversion method name
+    }
+
+    public List<CustomerOrdersSummaryDTO> getAllOrders() {
+
+        // Define the statuses you want to include
+        final List<String> targetStatuses = List.of("PENDING", "PICKUP");
+
+        // 1. Use the new repository method to fetch only the filtered orders
+        List<CustomerOrders> filteredOrders = CRepo.findByStatusIn(targetStatuses);
+
+        // 2. Stream the filtered list and convert each entity to a DTO
+        return filteredOrders.stream()
+                .map(this::orderToSummaryDto)
+                .toList(); // or collect(Collectors.toList());
     }
 
     public CustomerOrdersSummaryDTO getByIdAndUserId(Integer orderId, Long userId) {

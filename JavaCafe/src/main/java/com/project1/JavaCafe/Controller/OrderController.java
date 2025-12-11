@@ -44,16 +44,16 @@ public class OrderController {
 //        }
 
         // The JwtInterceptor placed this identity here after validating the token.
-        String userEmail = (String) request.getAttribute("email");
-
-        if (userEmail == null) {
+        //String userEmail = (String) request.getAttribute("email");
+        Long userId = (Long) request.getAttribute("userId"); // Check for casting
+        if (userId == null) {
             // This case should ideally be caught by the interceptor/security filter,
-            // but it's a good safety check if a token was invalid or missing the claim.
+            // safety check if a token was invalid or missing the claim.
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
         // 2. Call the AppUserService to look up the ID
-        Long userId = appService.getUserIdAfterLogin(userEmail);
+        //Long userId = appService.getUserIdAfterLogin(userEmail);
 
         // 3. Pass the userId and the rest of the DTO to the Order Service
         CustomerOrdersDTO newOrder = orderService.create(orderDetailsDTO, userId);

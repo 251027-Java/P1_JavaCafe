@@ -52,6 +52,8 @@ public class BasicAuthInterceptor implements HandlerInterceptor {
 //                }
                 // updated check with hashing check.
                 if(user.isPresent() && passwordEncoder.matches(password, user.get().getPassword())){
+                    request.setAttribute("email", user.get().getEmail());      // <-- FIX 2: Use appUser
+                    request.setAttribute("userRole", user.get().getUserRole()); // <-- FIX 3: Use appUser
                     return true;
                 }
             }
