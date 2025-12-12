@@ -26,7 +26,10 @@ public class WebConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/api/auth/login", "/api/auth/register")
 
                 // EXCLUSION: Allow the menu page without a token
-                .excludePathPatterns("/api/menu", "/api/menu/**"); // Excludes all methods (GET, POST, etc.) for this path
+                .excludePathPatterns("/api/menu", "/api/menu/**") // Excludes all methods (GET, POST, etc.) for this path
+
+                // EXCLUSION: Allow contact form submissions without a token
+                .excludePathPatterns("/api/contact", "/api/contact/**");
     }
 
     @Override
