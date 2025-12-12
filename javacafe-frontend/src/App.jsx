@@ -8,6 +8,7 @@ function App() {
         <div className="min-h-screen bg-amber-50">
             <Navbar />
             <Routes>
+                <Route path="/" element={<HomePage />} />
                 <Route path="/api" element={<HomePage />} />
                 <Route path="/api/menu" element={<MenuPage />} />
             </Routes>
