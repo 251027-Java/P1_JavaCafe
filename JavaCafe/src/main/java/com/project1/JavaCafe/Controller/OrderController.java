@@ -1,32 +1,76 @@
 package com.project1.JavaCafe.Controller;
 
-import com.project1.JavaCafe.DTO.CustomerOrdersDTO;
-import com.project1.JavaCafe.DTO.CustomerOrdersSummaryDTO;
-import com.project1.JavaCafe.DTO.CustomerOrdersWOIDDTO;
+import com.project1.JavaCafe.DTO.*;
 import com.project1.JavaCafe.Repository.AppUserRepository;
 import com.project1.JavaCafe.Repository.CustomerOrdersRepository;
 import com.project1.JavaCafe.Service.AppUserService;
 import com.project1.JavaCafe.Service.CustomerOrdersService;
+import com.project1.JavaCafe.Service.ProductsService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.Null;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 
 
 @RestController
-@RequestMapping("/api/orders") // domain:port/api/expenses
+@RequestMapping("/api/cart") // domain:port/api/expenses
 public class OrderController {
 
     private final CustomerOrdersService orderService;
     private final AppUserService appService;
+    private final ProductsService productsService;
 
-    public OrderController(CustomerOrdersService orderService, AppUserService appService ) {
+    public OrderController(CustomerOrdersService orderService, AppUserService appService, ProductsService productsService ) {
         this.orderService = orderService;
         this.appService = appService;
+        this.productsService = productsService;
     }
+
+    @GetMapping
+    public ResponseEntity<List<ProductsDTO>> getProducts(
+            // IMPORTANT: Change from Long categoryId to String categoryName
+            @RequestParam(required = false) String categoryName
+    ) {
+        List<ProductsDTO> products = productsService.findAllOrFilterByCategory(categoryName);
+
+        if (products.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(products);
+    }
+
+    @PostMapping("/guest/submit") // Use a clear endpoint path for guests
+    public ResponseEntity<CustomerOrdersDTO> submitPublicOrder(
+            @RequestBody GuestCheckoutDTO guestOrderDetails, // 1. Use the correct DTO
+            HttpServletRequest request // Optional, but can be kept
+    ) {
+
+        // --- Authentication Logic Removed ---
+        // NO token/userId check needed. The service layer handles creating the guest user.
+
+        // Safety check: Ensure cart items and essential guest info are present
+        if (guestOrderDetails.email() == null || guestOrderDetails.items() == null || guestOrderDetails.items().isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        try {
+            // 2. Call the Order Service method, passing the complete GuestCheckoutDTO
+            CustomerOrdersDTO newOrder = orderService.createGuestOrder(guestOrderDetails);
+
+            return new ResponseEntity<>(newOrder, HttpStatus.CREATED);
+
+        } catch (RuntimeException e) {
+            // Handle specific exceptions from the service layer (e.g., product not found)
+            // Log the error (e.getMessage())
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 
 
 
