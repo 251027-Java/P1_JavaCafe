@@ -36,7 +36,7 @@ public class ContactSubmissionService {
             submission.getLastname(),
             submission.getPhone(),
             submission.getEmail(),
-            submission.getSubject(),
+            submission.getSubject(), 
             submission.getMessage(),
             submission.getSubmittedAt()
         );
