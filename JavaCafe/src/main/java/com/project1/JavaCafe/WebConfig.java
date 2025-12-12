@@ -19,23 +19,19 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry reg) {
         // adding interceptors to the list of active/running interceptors
         // that are scanning requests as they come in
-        reg.addInterceptor(jwtInterceptor)
-                //.addPathPatterns("/api/**") // Apply to all /api/ paths
-
-                .excludePathPatterns("/api/**") // Apply to all /api/ paths
-
-                .excludePathPatterns("/api/cart")
-
-                // EXCLUSION: Allow login without a token
-                .excludePathPatterns("/api/auth/login", "/api/auth/register")
-
-                // EXCLUSION: Allow the menu page without a token
-                .excludePathPatterns("/api/menu", "/api/menu/**", "api/contact"); // Excludes all methods (GET, POST, etc.) for this path
-                .excludePathPatterns("/api/menu", "/api/menu/**") // Excludes all methods (GET, POST, etc.) for this path
-
-                // EXCLUSION: Allow contact form submissions without a token
-                .excludePathPatterns("/api/contact", "/api/contact/**");
-                .excludePathPatterns("/api/menu", "/api/menu/**", "/api/orders/new"); // Excludes all methods (GET, POST, etc.) for this path
+        reg.addInterceptor(jwtInterceptor) 
+                .addPathPatterns("/api/**") // Apply to all /api/ paths
+                
+                // EXCLUSIONS: Allow these paths without a token
+                .excludePathPatterns(
+                        "/api/auth/login", 
+                        "/api/auth/register",
+                        "/api/menu", 
+                        "/api/menu/**",
+                        "/api/contact",
+                        "/api/contact/**",
+                        "/api/cart"
+                );
     }
 
     @Override
