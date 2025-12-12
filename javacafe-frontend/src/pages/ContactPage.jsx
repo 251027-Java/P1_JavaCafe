@@ -188,3 +188,10 @@ const ContactPage = () => {
 };
 
 export default ContactPage;
+const ContactPage = () => {
+    return (
+
+    );
+};
+
+export deafult ContactPage;

@@ -43,6 +43,90 @@ public class CustomerOrdersService {
         this.IRepo = IRepo;
     }
 
+    public CustomerOrdersDTO createGuestOrder(GuestCheckoutDTO guestOrder) {
+
+        // ----------------------------------------------------
+        // 1. CREATE AppUser ENTRY (Generates userId)
+        // ----------------------------------------------------
+
+        // Create the AppUser entry, using the guest data and a null password
+        AppUser newGuestUser = new AppUser(
+                guestOrder.email(),          // Required field from input DTO
+                null,                        // Allowed due to nullable=true constraint
+                "GUEST",                     // Role is set to GUEST
+                guestOrder.firstName(),
+                guestOrder.lastName()
+        );
+
+        // Save the new user. The database generates the userId here.
+        AppUser savedGuestUser = ARepo.save(newGuestUser);
+        AppUser user = savedGuestUser; // This object now holds the generated userId
+
+        // ----------------------------------------------------
+        // 2. CALCULATE AND CREATE OrderItems
+        // ----------------------------------------------------
+
+        BigDecimal calculatedTotalCost = BigDecimal.ZERO;
+        List<OrderItems> orderItemsToSave = new ArrayList<>();
+
+        // Loop for secure price calculation and OrderItems creation
+        for (CartItemInputDTO itemDto : guestOrder.items()) {
+
+            // Fetch authoritative price
+            Products product = PRepo.findById(itemDto.productId())
+                    .orElseThrow(() -> new RuntimeException("Product not found with ID: " + itemDto.productId()));
+
+            BigDecimal unitPrice = product.getBasePrice();
+            BigDecimal lineItemCost = unitPrice.multiply(BigDecimal.valueOf(itemDto.quantity()));
+            calculatedTotalCost = calculatedTotalCost.add(lineItemCost);
+
+            // Create the OrderItems entity
+            OrderItems item = new OrderItems(
+                    null,
+                    product,
+                    itemDto.quantity(),
+                    unitPrice
+            );
+            orderItemsToSave.add(item);
+        }
+
+        // ----------------------------------------------------
+        // 3. CREATE CustomerOrders ENTRY (Links all three)
+        // ----------------------------------------------------
+
+        // Create the main Order entity
+        CustomerOrders order = new CustomerOrders(
+                user, // <-- LINKED to the savedGuestUser (with generated userId)
+                calculatedTotalCost,
+                LocalDate.now(),
+                "PENDING"
+        );
+
+        // Establish bidirectional link for cascade save
+        for (OrderItems item : orderItemsToSave) {
+            item.setOrder(order);
+        }
+        order.setOrderItems(orderItemsToSave);
+
+        // Save the parent entity. This transaction saves CustomerOrders and all linked OrderItems.
+        CustomerOrders savedOrder = CRepo.save(order);
+
+        return orderToDetailDto(savedOrder);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////
+
     // Methods
     // The method takes the order details DTO AND the userId (a Long)
     public CustomerOrdersDTO create(CustomerOrdersWOIDDTO dto, Long userId) {

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductsService {
@@ -20,6 +21,8 @@ public class ProductsService {
     public ProductsService (ProductsRepository repository){
         this.repository = repository;
     }
+
+
 
     // Methods
     private MenuProductsDTO productToMenuDto(Products product) {
@@ -33,6 +36,36 @@ public class ProductsService {
                 product.getBasePrice(),
                 product.getAvailability()
                 // No item list passed here
+        );
+    }
+
+    // IMPORTANT: Accepts a String categoryName (which can be null for "All")
+    public List<ProductsDTO> findAllOrFilterByCategory(String categoryName) {
+        List<Products> products;
+
+        if (categoryName == null) {
+            // Case 1: "All" products (No filter applied)
+            products = repository.findAll();
+        } else {
+            // Case 2: Filtered by category name string
+            products = repository.findByCategory(categoryName);
+        }
+
+        return products.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    private ProductsDTO convertToDto(Products product) {
+        String catName = product.getCategory() != null ? product.getCategory() : "Uncategorized";
+
+        return new ProductsDTO(
+                product.getProductId(),
+                catName, // Uses the category name string
+                product.getName(),
+                product.getBasePrice(),
+                product.getDescription(),
+                product.getAvailability()
         );
     }
 
