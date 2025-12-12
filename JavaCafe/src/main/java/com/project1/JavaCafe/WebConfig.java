@@ -8,17 +8,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
     // Fields
-    //private final BasicAuthInterceptor basicAuthInterceptor;
     private final JwtInterceptor jwtInterceptor;
 
     // Constructor
-    // public WebConfig(BasicAuthInterceptor bai) {
-    //     this.basicAuthInterceptor = bai;
-    // }
     public WebConfig(JwtInterceptor jwti) {
         this.jwtInterceptor = jwti;
     }
-
 
     @Override
     public void addInterceptors(InterceptorRegistry reg) {

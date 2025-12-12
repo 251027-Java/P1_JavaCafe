@@ -46,10 +46,6 @@ public class BasicAuthInterceptor implements HandlerInterceptor {
                 // check if the user is in the db
                 Optional<AppUser> user = repo.findByEmail(email);
 
-//                // check if the password is correct
-//                if (user.isPresent() && user.get().getPassword().equals(password)) {
-//                    return true;
-//                }
                 // updated check with hashing check.
                 if(user.isPresent() && passwordEncoder.matches(password, user.get().getPassword())){
                     request.setAttribute("email", user.get().getEmail());      // <-- FIX 2: Use appUser
