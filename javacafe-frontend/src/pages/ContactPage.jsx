@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import ContactService from '../services/ContactService';
 
 const ContactPage = () => {
     const [formData, setFormData] = useState({
-        firstname: '',
-        lastname: '',
+        firstName: '',
+        lastName: '',
         phone: '',
         email: '',
         subject: '',
@@ -27,15 +28,7 @@ const ContactPage = () => {
         setSubmitStatus(null);
 
         try {
-            const response = await fetch('/api/contact/submit', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData)
-            });
-
-            if (response.ok) {
+            await ContactService.submitContact(formData);
                 setSubmitStatus('success');
                 setFormData({
                     firstname: '',
@@ -45,9 +38,7 @@ const ContactPage = () => {
                     subject: '',
                     message: ''
                 });
-            } else {
-                setSubmitStatus('error');
-            }
+           setTimeout(() => setSubmitStatus(null), 5000);
         } catch (error) {
             console.error('Error submitting form:', error);
             setSubmitStatus('error');
