@@ -4,7 +4,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import HomePage from './pages/HomePage';
 import PlaceOrderPage from './pages/PlaceOrderPage';
-import MenuPage from './pages/MenuPage'
 import MenuPage from './pages/MenuPage';
 import { Routes, Route } from 'react-router-dom';
 
