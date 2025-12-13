@@ -39,20 +39,20 @@ public class JavaCafeApplication {
                 // Spring safely calls the service method here after everything is ready
                 productsService.initializeTable();
 
-                // ADD ADMIN USER LOGIC
-                if (appUserRepository.findByEmail("admin.user@cafe.com").isEmpty()) {
+                // ADD GUEST USER LOGIC
+                if (appUserRepository.findByEmail("guest.user@cafe.com").isEmpty()) {
 
-                    String adminHashedPassword = passwordEncoder.encode("adminpassword1");
+                    String adminHashedPassword = passwordEncoder.encode("guestpassword1");
 
                     AppUser adminUser = new AppUser(
-                            "admin.user@cafe.com",
+                            "guest.user@cafe.com",
                             adminHashedPassword,
-                            "ADMIN", // Set role to ADMIN
+                            "GUEST", // Set role to ADMIN
                             "Cafe",
-                            "Admin"
+                            "Guest"
                     );
                     appUserRepository.save(adminUser);
-                    System.out.println("--- Created Admin Profile ---");
+                    System.out.println("--- Created Guest User ---");
                 }
 
                 // Check if a test user exists to prevent duplicates
