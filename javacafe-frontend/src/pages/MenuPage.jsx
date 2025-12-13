@@ -1,24 +1,38 @@
 import { useState } from 'react';
 
-// Mock data for the menu
 const mockProducts = [
-    // Coffee
     { productId: 1, category: 'COFFEE', name: 'Java House Espresso', basePrice: 3.00, availability: 'IN_STOCK' },
     { productId: 2, category: 'COFFEE', name: 'Coffee Misto', basePrice: 4.00, availability: 'IN_STOCK' },
-    { productId: 3, category: 'COFFEE', name: 'Mocha Frappuccino', basePrice: 6.50, availability: 'IN_STOCK' },
+    { productId: 3, category: 'COFFEE', name: 'Mocha', basePrice: 5.50, availability: 'IN_STOCK' },
+    { productId: 4, category: 'COFFEE', name: 'Mocha Frappuccino', basePrice: 6.50, availability: 'IN_STOCK' },
+    { productId: 5, category: 'COFFEE', name: 'Cappuccino', basePrice: 4.50, availability: 'IN_STOCK' },
+    { productId: 6, category: 'COFFEE', name: 'Latte', basePrice: 4.75, availability: 'IN_STOCK' },
     
-    // Cupcakes
-    { productId: 4, category: 'CUPCAKES', name: 'Vanilla Bean Bliss', basePrice: 4.00, availability: 'IN_STOCK' },
-    { productId: 5, category: 'CUPCAKES', name: 'Red Velvet Dream', basePrice: 4.25, availability: 'IN_STOCK' },
-    { productId: 6, category: 'CUPCAKES', name: 'Triple Chocolate Overload', basePrice: 4.25, availability: 'IN_STOCK' },
+    { productId: 7, category: 'CAKES', name: 'Chocolate Cake', basePrice: 6.00, availability: 'IN_STOCK' },
+    { productId: 8, category: 'CAKES', name: 'Red Velvet Cake', basePrice: 6.50, availability: 'IN_STOCK' },
+    { productId: 9, category: 'CAKES', name: 'Vanilla Bean Cake', basePrice: 5.75, availability: 'IN_STOCK' },
+    { productId: 10, category: 'CAKES', name: 'Carrot Cake', basePrice: 6.25, availability: 'IN_STOCK' },
     
-    // Croissants
-    { productId: 7, category: 'CROISSANTS', name: 'Classic Butter Croissant', basePrice: 3.75, availability: 'IN_STOCK' },
-    { productId: 8, category: 'CROISSANTS', name: 'Cinnamon Swirl Croissant', basePrice: 4.50, availability: 'IN_STOCK' },
+    { productId: 11, category: 'CUPCAKES', name: 'Vanilla Bean Bliss', basePrice: 4.00, availability: 'IN_STOCK' },
+    { productId: 12, category: 'CUPCAKES', name: 'Red Velvet Dream', basePrice: 4.25, availability: 'IN_STOCK' },
+    { productId: 13, category: 'CUPCAKES', name: 'Triple Chocolate Overload', basePrice: 4.25, availability: 'IN_STOCK' },
     
-    // Cookies
-    { productId: 9, category: 'COOKIES', name: 'Signature Chocolate Chip', basePrice: 2.50, availability: 'IN_STOCK' },
-    { productId: 10, category: 'COOKIES', name: 'Oatmeal Cranberry White Chocolate', basePrice: 2.75, availability: 'IN_STOCK' },
+    { productId: 14, category: 'PASTRIES', name: 'Cheese Danish', basePrice: 4.50, availability: 'IN_STOCK' },
+    { productId: 15, category: 'PASTRIES', name: 'Apple Danish', basePrice: 4.25, availability: 'IN_STOCK' },
+    { productId: 16, category: 'PASTRIES', name: 'Chocolate Croissant', basePrice: 4.75, availability: 'IN_STOCK' },
+    
+    { productId: 17, category: 'CROISSANTS', name: 'Classic Butter Croissant', basePrice: 3.75, availability: 'IN_STOCK' },
+    { productId: 18, category: 'CROISSANTS', name: 'Cinnamon Swirl Croissant', basePrice: 4.50, availability: 'IN_STOCK' },
+    
+    { productId: 19, category: 'MUFFINS', name: 'Blueberry Muffin', basePrice: 3.50, availability: 'IN_STOCK' },
+    { productId: 20, category: 'MUFFINS', name: 'Chocolate Chip Muffin', basePrice: 3.75, availability: 'IN_STOCK' },
+    { productId: 21, category: 'MUFFINS', name: 'Banana Nut Muffin', basePrice: 3.50, availability: 'IN_STOCK' },
+    { productId: 22, category: 'MUFFINS', name: 'Lemon Poppy Seed Muffin', basePrice: 3.75, availability: 'IN_STOCK' },
+    
+    { productId: 23, category: 'COOKIES', name: 'Chocolate Chip Cookies', basePrice: 2.50, availability: 'IN_STOCK' },
+    { productId: 24, category: 'COOKIES', name: 'Signature Chocolate Chip', basePrice: 2.50, availability: 'IN_STOCK' },
+    { productId: 25, category: 'COOKIES', name: 'Oatmeal Cranberry White Chocolate', basePrice: 2.75, availability: 'IN_STOCK' },
+    { productId: 26, category: 'COOKIES', name: 'Sugar Cookie', basePrice: 2.25, availability: 'IN_STOCK' },
 ];
 
 function MenuPage() {
@@ -41,7 +55,7 @@ function MenuPage() {
     }, {});
 
     const allCategories = Object.keys(productsByCategory).sort();
-    const preferredOrder = ['COFFEE', 'CUPCAKES', 'CROISSANTS', 'COOKIES'];
+    const preferredOrder = ['COFFEE', 'CAKES', 'CUPCAKES', 'PASTRIES', 'CROISSANTS', 'MUFFINS', 'COOKIES'];
     const sortedCategories = [
         ...preferredOrder.filter(cat => productsByCategory[cat]),
         ...allCategories.filter(cat => !preferredOrder.includes(cat))
