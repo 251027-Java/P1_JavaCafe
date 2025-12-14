@@ -3,8 +3,8 @@ import ContactService from '../services/ContactService';
 
 const ContactPage = () => {
     const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
+        firstname: '',
+        lastname: '',
         phone: '',
         email: '',
         subject: '',
@@ -13,6 +13,7 @@ const ContactPage = () => {
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitStatus, setSubmitStatus] = useState(null);
+    const [errors, setErrors] = useState({});
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -24,21 +25,37 @@ const ContactPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setIsSubmitting(true);
         setSubmitStatus(null);
+
+        // Validate all fields at once
+        const newErrors = {};
+        if (!formData.firstname.trim()) newErrors.firstname = 'First name is required.';
+        if (!formData.lastname.trim()) newErrors.lastname = 'Last name is required.';
+        if (!formData.phone.trim()) newErrors.phone = 'Phone is required.';
+        if (!formData.email.trim()) newErrors.email = 'Email is required.';
+        if (!formData.subject.trim()) newErrors.subject = 'Subject is required.';
+        if (!formData.message.trim()) newErrors.message = 'Message is required.';
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
+
+        setErrors({});
+        setIsSubmitting(true);
 
         try {
             await ContactService.submitContact(formData);
-                setSubmitStatus('success');
-                setFormData({
-                    firstname: '',
-                    lastname: '',
-                    phone: '',
-                    email: '',
-                    subject: '',
-                    message: ''
-                });
-           setTimeout(() => setSubmitStatus(null), 5000);
+            setSubmitStatus('success');
+            setFormData({
+                firstname: '',
+                lastname: '',
+                phone: '',
+                email: '',
+                subject: '',
+                message: ''
+            });
+            setTimeout(() => setSubmitStatus(null), 5000);
         } catch (error) {
             console.error('Error submitting form:', error);
             setSubmitStatus('error');
@@ -65,7 +82,7 @@ const ContactPage = () => {
                 </div>
             )}
 
-            <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-8">
+            <form onSubmit={handleSubmit} noValidate className="bg-white rounded-lg shadow-md p-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
                         <label htmlFor="firstname" className="block text-gray-700 font-medium mb-2">
@@ -81,6 +98,9 @@ const ContactPage = () => {
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                             placeholder="Enter your first name"
                         />
+                        {errors.firstname && (
+                            <p className="text-red-600 text-sm mt-1">{errors.firstname}</p>
+                        )}
                     </div>
 
                     <div>
@@ -97,6 +117,9 @@ const ContactPage = () => {
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                             placeholder="Enter your last name"
                         />
+                        {errors.lastname && (
+                            <p className="text-red-600 text-sm mt-1">{errors.lastname}</p>
+                        )}
                     </div>
                 </div>
 
@@ -115,6 +138,9 @@ const ContactPage = () => {
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                             placeholder="Enter your phone number"
                         />
+                        {errors.phone && (
+                            <p className="text-red-600 text-sm mt-1">{errors.phone}</p>
+                        )}
                     </div>
 
                     <div>
@@ -131,6 +157,9 @@ const ContactPage = () => {
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                             placeholder="Enter your email address"
                         />
+                        {errors.email && (
+                            <p className="text-red-600 text-sm mt-1">{errors.email}</p>
+                        )}
                     </div>
                 </div>
 
@@ -148,6 +177,9 @@ const ContactPage = () => {
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                         placeholder="Enter the subject of your inquiry"
                     />
+                    {errors.subject && (
+                        <p className="text-red-600 text-sm mt-1">{errors.subject}</p>
+                    )}
                 </div>
 
                 <div className="mb-6">
@@ -164,6 +196,9 @@ const ContactPage = () => {
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-vertical"
                         placeholder="Enter your message"
                     />
+                    {errors.message && (
+                        <p className="text-red-600 text-sm mt-1">{errors.message}</p>
+                    )}
                 </div>
 
                 <button

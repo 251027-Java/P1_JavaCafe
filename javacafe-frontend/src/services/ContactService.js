@@ -3,7 +3,7 @@ const ContactService = {
 
     async submitContact(contactData) {
         try {
-            const response = await fetch(this.baseUrl, {
+            const response = await fetch(`${this.baseUrl}/submit`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -21,3 +21,5 @@ const ContactService = {
         }
     }
 }
+
+export default ContactService;
