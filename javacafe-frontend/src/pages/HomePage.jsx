@@ -36,10 +36,10 @@ function HomePage() {
         },
         {
             id: 2,
-            image: 'https://www.biggerbolderbaking.com/wp-content/uploads/2020/11/Cheese-Danish-thumbnail-scaled.jpg',
-            title: 'Cheese Danish',
-            description: 'Sweet pastry featuring flaky, buttery dough folded around a rich, tangy, cheesecake-like filling, finished with a sweet glaze, creating a delightful contrast of textures and sweet-savory flavors. ',
-            linkText: 'View Pastries',
+            image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=400&h=300&fit=crop',
+            title: 'Butter Croissant',
+            description: 'Flaky, buttery croissant with golden layers that melt in your mouth. Baked fresh daily to perfection with a crispy exterior and soft, airy interior. ',
+            linkText: 'View Croissants',
             linkTo: '/api/menu'
         },
         {
