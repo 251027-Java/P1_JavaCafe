@@ -1,7 +1,6 @@
 package com.project1.JavaCafe.Service;
 
 import com.project1.JavaCafe.DTO.*;
-import com.project1.JavaCafe.Model.CustomerOrders;
 import com.project1.JavaCafe.Model.Products;
 //import com.project1.JavaCafe.DTO.ProductsDTO;
 import com.project1.JavaCafe.Repository.ProductsRepository;
@@ -9,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,8 +27,6 @@ public class ProductsService {
     // Methods
     private MenuProductsDTO productToMenuDto(Products product) {
 
-        // No logic here to map order.getOrderItems()
-
         return new MenuProductsDTO(
                 product.getProductId(),
                 product.getCategory(),
@@ -39,7 +37,6 @@ public class ProductsService {
         );
     }
 
-    // IMPORTANT: Accepts a String categoryName (which can be null for "All")
     public List<ProductsDTO> findAllOrFilterByCategory(String categoryName) {
         List<Products> products;
 
@@ -47,7 +44,7 @@ public class ProductsService {
             // Case 1: "All" products (No filter applied)
             products = repository.findAll();
         } else {
-            // Case 2: Filtered by category name string
+            // Case 2: Filtered by category name
             products = repository.findByCategory(categoryName);
         }
 
@@ -61,7 +58,7 @@ public class ProductsService {
 
         return new ProductsDTO(
                 product.getProductId(),
-                catName, // Uses the category name string
+                catName, // Uses the category name
                 product.getName(),
                 product.getBasePrice(),
                 product.getDescription(),
@@ -77,25 +74,21 @@ public class ProductsService {
 
     private ProductsDTO ProductsToDto(Products product) {
         return new ProductsDTO(
-                product.getProductId(),   // 1
-                product.getCategory(),    // 2
-                product.getName(),        // 3
-                product.getBasePrice(),   // 4
-                product.getDescription(), // 5
-                product.getAvailability() // 6
+                product.getProductId(),  
+                product.getCategory(),   
+                product.getName(),       
+                product.getBasePrice(),  
+                product.getDescription(),
+                product.getAvailability() 
         );
     }
 
     public List<ProductsDTO> getAllProducts() {
-        // the repo method returns a list of expenses...
-        // we need to convert every expense on the list to a DTO...
-        // keep/put back in a list to return
         return repository.findAll().stream().map(this::ProductsToDto).toList();
     }
 
     private MenuProductsDTO ProductToMenuDto(Products product) {
         return new MenuProductsDTO(
-                // Mapping Fields from Entity to DTO:
 
                 // 1. Category
                 product.getProductId(),
@@ -104,59 +97,37 @@ public class ProductsService {
                 // 2. Name
                 product.getName(),
 
-                // 3. Base Price
+                // 3. Price
                 product.getBasePrice(),
 
                 // 4. Availability
                 product.getAvailability()
 
-                // Fields Omitted (e.g., productId, description, internalCost)
         );
     }
 
     public List<MenuProductsDTO> getAllMenuProducts() {
-        // the repo method returns a list of expenses...
-        // we need to convert every expense on the list to a DTO...
-        // keep/put back in a list to return
-        List<Products> productsList = repository.findAll();
-
         return repository.findAll().stream().map(this::ProductToMenuDto).toList();
     }
 
     public MenuDescriptionDTO getProductDescription(Long productId) {
 
-        // Find the product by ID or throw a 404 NOT FOUND exception
         Products product = repository.findById(productId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Product not found with ID: " + productId)
                 );
 
-        // Map only the description field into the new DTO
         return new MenuDescriptionDTO(product.getDescription());
     }
 
-
-    /*
-        Long productId,
-        String category,
-        String name,
-        BigDecimal basePrice,
-        String description,
-        String availability
-     */
-
     public ProductsDTO update(Long id, ProductsDTO dto) {
 
-        // 1. Find the existing product entity by ID. Throws 404 if not found.
         Products product = repository.findById(id)
                 .orElseThrow(
                         () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found with ID: " + id)
                 );
 
-        // 2. Update the fields of the retrieved 'product' entity using the 'dto' fields
-
-        // Check if the DTO field is not null before setting (optional, but good practice for PATCH-like updates)
         if (dto.category() != null) {
             product.setCategory(dto.category());
         }
@@ -173,120 +144,136 @@ public class ProductsService {
             product.setDescription(dto.description());
         }
 
-        // Assuming availability is either a String or an Enum
         if (dto.availability() != null) {
             product.setAvailability(dto.availability());
         }
 
-        // 3. Save the updated entity back to the database.
         Products updatedProduct = repository.save(product);
 
-        // 4. Convert the saved entity back to the DTO without ID for the response.
-        // NOTE: Replace 'ProductToDto' with your actual conversion method name.
         return ProductsToDto(updatedProduct);
     }
 
-    public void initializeTable() {
-        // Use count() to check if the table has any records
-        if(repository.count() == 0) {
-
-            // Create a properly initialized Products entity with necessary data
-            Products espresso = new Products(
-                    "COFFEE",
-                    "Java House Espresso",
-                    new java.math.BigDecimal("3.00"),
-                    "A rich, single-origin shot, perfectly pulled. Bold and balanced.",
-                    "IN_STOCK"
-            );
-
-            // Use the standard JPA save() method
-            repository.save(espresso);
-
-            Products misto = new Products(
-                    "COFFEE",
-                    "Coffee Misto",
-                    new java.math.BigDecimal("4.00"),
-                    "A soothing blend of filtered house coffee and steamed milk. Simple and comforting.",
-                    "IN_STOCK"
-            );
-            repository.save(misto);
-
-            Products mocha = new Products(
-                    "COFFEE",
-                    "Mocha Frappuccino",
-                    new java.math.BigDecimal("6.50"),
-                    "Iced blended coffee drink mixed with rich chocolate syrup, milk, and ice, topped with whipped cream.",
-                    "IN_STOCK"
-            );
-            repository.save(mocha);
-
-            Products vanilla = new Products(
-                    "CUPCAKES",
-                    "Vanilla Bean Bliss",
-                    new java.math.BigDecimal("4.00"),
-                    "Fluffy vanilla cake infused with real vanilla bean, finished with a sweet buttercream swirl.",
-                    "IN_STOCK"
-            );
-            repository.save(vanilla);
-
-            Products red = new Products(
-                    "CUPCAKES",
-                    "Red Velvet Dream",
-                    new java.math.BigDecimal("4.25"),
-                    "Moist, ruby-red cake with a hint of cocoa, topped with classic cream cheese frosting.",
-                    "IN_STOCK"
-            );
-            repository.save(red);
-
-            Products chocolate = new Products(
-                    "CUPCAKES",
-                    "Triple Chocolate Overload",
-                    new java.math.BigDecimal("4.25"),
-                    "Rich dark chocolate cake with chocolate chips, crowned with smooth chocolate ganache frosting.",
-                    "IN_STOCK"
-            );
-            repository.save(chocolate);
-
-            Products butter  = new Products(
-                    "CROISSANTS",
-                    "Classic Butter Croissant",
-                    new java.math.BigDecimal("3.75"),
-                    "Light, flaky, and golden-brown pastry layers, perfect served warm.",
-                    "IN_STOCK"
-            );
-            repository.save(butter);
-
-            Products cinnamon = new Products(
-                    "CROISSANTS",
-                    "Cinnamon Swirl Croissant",
-                    new java.math.BigDecimal("4.50"),
-                    "Buttery croissant dough rolled with a sweet cinnamon sugar filling and finished with a light vanilla glaze.",
-                    "IN_STOCK"
-            );
-            repository.save(cinnamon);
-
-            Products chip = new Products(
-                    "COOKIES",
-                    "Signature Chocolate Chip",
-                    new java.math.BigDecimal("2.50"),
-                    "A warm, gooey classic with melted milk and dark chocolate chips.",
-                    "IN_STOCK"
-            );
-            repository.save(chip);
-
-            Products oatmeal = new Products(
-                    "COOKIES",
-                    "Oatmeal Cranberry White Chocolate",
-                    new java.math.BigDecimal("2.75"),
-                    "Soft, chewy oatmeal cookie loaded with dried cranberries and white chocolate chunks.",
-                    "IN_STOCK"
-            );
-            repository.save(oatmeal);
-
-
-
-
-            System.out.println("--- Products table successfully initialized with sample data. ---");
+    private void saveOrUpdateProduct(String category, String name, BigDecimal basePrice, String description, String availability) {
+        // Try to find existing product by name
+        List<Products> existingProducts = repository.findAll().stream()
+                .filter(p -> p.getName().equals(name) && p.getCategory().equals(category))
+                .collect(Collectors.toList());
+        
+        Products product;
+        if (!existingProducts.isEmpty()) {
+            // Update existing product
+            product = existingProducts.get(0);
+            product.setCategory(category);
+            product.setName(name);
+            product.setBasePrice(basePrice);
+            product.setDescription(description);
+            product.setAvailability(availability);
+            System.out.println("Updated product: " + name);
+        } else {
+            // Create new product
+            product = new Products(category, name, basePrice, description, availability);
+            System.out.println("Created product: " + name);
         }
+        repository.save(product);
+    }
+
+    public void initializeTable() {
+        System.out.println("--- Starting Products table initialization/update ---");
+        
+        // COFFEE
+        saveOrUpdateProduct("COFFEE", "Java House Espresso", new BigDecimal("3.00"),
+                "A rich, single-origin shot, perfectly pulled. Bold and balanced.", "IN_STOCK");
+        saveOrUpdateProduct("COFFEE", "Coffee Misto", new BigDecimal("4.00"),
+                "A soothing blend of filtered house coffee and steamed milk. Simple and comforting.", "IN_STOCK");
+        saveOrUpdateProduct("COFFEE", "Cappuccino", new BigDecimal("4.50"),
+                "Espresso with steamed milk and a layer of velvety foam. Perfectly balanced and creamy.", "IN_STOCK");
+        saveOrUpdateProduct("COFFEE", "Caramel Macchiato", new BigDecimal("5.25"),
+                "Espresso with vanilla-flavored syrup, steamed milk, and caramel drizzle. Sweet and indulgent.", "IN_STOCK");
+        saveOrUpdateProduct("COFFEE", "Mocha Frappuccino", new BigDecimal("6.50"),
+                "Iced blended coffee drink mixed with rich chocolate syrup, milk, and ice, topped with whipped cream.", "IN_STOCK");
+
+        // CUPCAKES
+        saveOrUpdateProduct("CUPCAKES", "Vanilla Bean Bliss", new BigDecimal("4.00"),
+                "Fluffy vanilla cake infused with real vanilla bean, finished with a sweet buttercream swirl.", "IN_STOCK");
+        saveOrUpdateProduct("CUPCAKES", "Red Velvet Dream", new BigDecimal("4.25"),
+                "Moist, ruby-red cake with a hint of cocoa, topped with classic cream cheese frosting.", "IN_STOCK");
+        saveOrUpdateProduct("CUPCAKES", "Triple Chocolate Overload", new BigDecimal("4.50"),
+                "Rich dark chocolate cake with chocolate chips, crowned with smooth chocolate ganache frosting.", "IN_STOCK");
+        saveOrUpdateProduct("CUPCAKES", "Lemon Zest Delight", new BigDecimal("4.00"),
+                "Bright and tangy lemon cake with zesty lemon frosting. Refreshing and delightful.", "IN_STOCK");
+        saveOrUpdateProduct("CUPCAKES", "Strawberry Shortcake", new BigDecimal("4.25"),
+                "Vanilla cake topped with fresh strawberries and whipped cream. Classic and sweet.", "IN_STOCK");
+
+        // COOKIES
+        saveOrUpdateProduct("COOKIES", "Signature Chocolate Chip", new BigDecimal("2.50"),
+                "A warm, gooey classic with melted milk and dark chocolate chips.", "IN_STOCK");
+        saveOrUpdateProduct("COOKIES", "Oatmeal Cranberry White Chocolate", new BigDecimal("2.75"),
+                "Soft, chewy oatmeal cookie loaded with dried cranberries and white chocolate chunks.", "IN_STOCK");
+        saveOrUpdateProduct("COOKIES", "Double Fudge Brownie Cookie", new BigDecimal("3.00"),
+                "Rich, fudgy cookie with double the chocolate. Dense and decadent.", "IN_STOCK");
+        saveOrUpdateProduct("COOKIES", "Snickerdoodle", new BigDecimal("2.50"),
+                "Soft and chewy cinnamon-sugar cookie with a buttery, melt-in-your-mouth texture.", "IN_STOCK");
+
+        // CROISSANTS
+        saveOrUpdateProduct("CROISSANTS", "Classic Butter Croissant", new BigDecimal("3.75"),
+                "Light, flaky, and golden-brown pastry layers, perfect served warm.", "IN_STOCK");
+        saveOrUpdateProduct("CROISSANTS", "Cinnamon Swirl Croissant", new BigDecimal("4.50"),
+                "Buttery croissant dough rolled with a sweet cinnamon sugar filling and finished with a light vanilla glaze.", "IN_STOCK");
+        saveOrUpdateProduct("CROISSANTS", "Chocolate Almond Croissant", new BigDecimal("4.75"),
+                "Buttery croissant filled with rich chocolate and topped with sliced almonds. Indulgent and satisfying.", "IN_STOCK");
+        saveOrUpdateProduct("CROISSANTS", "Plain Croissant", new BigDecimal("3.50"),
+                "Simple, buttery, and flaky croissant. A classic French pastry at its finest.", "IN_STOCK");
+        saveOrUpdateProduct("CROISSANTS", "Ham and Cheese Croissant", new BigDecimal("5.00"),
+                "Savory croissant filled with premium ham and melted cheese. Perfect for a hearty breakfast.", "IN_STOCK");
+
+        // PASTRIES
+        saveOrUpdateProduct("PASTRIES", "Cheese Danish", new BigDecimal("4.50"),
+                "Flaky pastry filled with sweet cream cheese. Buttery and rich.", "IN_STOCK");
+        saveOrUpdateProduct("PASTRIES", "Blueberry Muffin", new BigDecimal("3.50"),
+                "Moist muffin bursting with fresh blueberries. Topped with a sweet crumb topping.", "IN_STOCK");
+        saveOrUpdateProduct("PASTRIES", "Apple Turnover", new BigDecimal("4.25"),
+                "Flaky pastry filled with spiced apple filling. Warm and comforting.", "IN_STOCK");
+        saveOrUpdateProduct("PASTRIES", "Almond Croissant", new BigDecimal("4.75"),
+                "Buttery croissant filled with almond paste and topped with sliced almonds. Rich and nutty.", "IN_STOCK");
+        saveOrUpdateProduct("PASTRIES", "Chocolate Eclair", new BigDecimal("4.50"),
+                "Light choux pastry filled with vanilla cream and topped with rich chocolate glaze.", "IN_STOCK");
+
+        // SANDWICHES
+        saveOrUpdateProduct("SANDWICHES", "BLT Classic", new BigDecimal("7.50"),
+                "Crispy bacon, fresh lettuce, and ripe tomatoes on toasted bread. A timeless favorite.", "IN_STOCK");
+        saveOrUpdateProduct("SANDWICHES", "Caprese Sandwich", new BigDecimal("8.00"),
+                "Fresh mozzarella, ripe tomatoes, and basil with balsamic glaze on ciabatta. Light and fresh.", "IN_STOCK");
+        saveOrUpdateProduct("SANDWICHES", "Grilled Chicken Panini", new BigDecimal("8.50"),
+                "Tender grilled chicken with pesto, mozzarella, and sun-dried tomatoes on pressed ciabatta.", "IN_STOCK");
+        saveOrUpdateProduct("SANDWICHES", "Turkey Avocado Club", new BigDecimal("9.00"),
+                "Sliced turkey, crispy bacon, avocado, lettuce, and tomato on multigrain bread. Hearty and satisfying.", "IN_STOCK");
+        saveOrUpdateProduct("SANDWICHES", "Veggie Delight", new BigDecimal("7.00"),
+                "Fresh vegetables, hummus, and sprouts on whole grain bread. Healthy and delicious.", "IN_STOCK");
+
+        // SALADS
+        saveOrUpdateProduct("SALADS", "Caesar Salad", new BigDecimal("8.50"),
+                "Crisp romaine lettuce with parmesan cheese, croutons, and classic Caesar dressing.", "IN_STOCK");
+        saveOrUpdateProduct("SALADS", "Cobb Salad", new BigDecimal("9.50"),
+                "Mixed greens with grilled chicken, bacon, hard-boiled eggs, avocado, and blue cheese. A complete meal.", "IN_STOCK");
+        saveOrUpdateProduct("SALADS", "Garden Fresh Salad", new BigDecimal("7.50"),
+                "Mixed greens with seasonal vegetables, cherry tomatoes, and your choice of dressing. Fresh and crisp.", "IN_STOCK");
+        saveOrUpdateProduct("SALADS", "Grilled Chicken Salad", new BigDecimal("9.00"),
+                "Tender grilled chicken over mixed greens with vegetables and your choice of dressing.", "IN_STOCK");
+        saveOrUpdateProduct("SALADS", "Quinoa Power Bowl", new BigDecimal("9.75"),
+                "Protein-packed quinoa with roasted vegetables, chickpeas, and tahini dressing. Nutritious and filling.", "IN_STOCK");
+
+        // SMOOTHIES
+        saveOrUpdateProduct("SMOOTHIES", "Berry Blast Smoothie", new BigDecimal("5.50"),
+                "Mixed berries blended with yogurt and a touch of honey. Refreshing and antioxidant-rich.", "IN_STOCK");
+        saveOrUpdateProduct("SMOOTHIES", "Chocolate Banana Smoothie", new BigDecimal("5.75"),
+                "Rich chocolate blended with ripe bananas and milk. Creamy and indulgent.", "IN_STOCK");
+        saveOrUpdateProduct("SMOOTHIES", "Green Power Smoothie", new BigDecimal("6.00"),
+                "Spinach, kale, pineapple, and banana blended for a nutritious energy boost.", "IN_STOCK");
+        saveOrUpdateProduct("SMOOTHIES", "Peach Mango Smoothie", new BigDecimal("5.75"),
+                "Tropical peaches and mangoes blended with yogurt. Sweet and refreshing.", "IN_STOCK");
+        saveOrUpdateProduct("SMOOTHIES", "Tropical Paradise Smoothie", new BigDecimal("6.25"),
+                "Pineapple, mango, coconut, and banana blended for a taste of the tropics.", "IN_STOCK");
+
+        System.out.println("--- Products table successfully initialized/updated with all menu items. ---");
     }
 }
