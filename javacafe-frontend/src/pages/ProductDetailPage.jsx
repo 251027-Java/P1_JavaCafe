@@ -1,66 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getProductImage } from '../assets/images/imageMap';
+import { getMenuProducts, getProductDescription } from '../services/MenuService';
 
 const PRODUCT_ID_FIELD_NAME = 'productId';
-
-// Mock products data (same as MenuPage)
-const mockProducts = [
-    // COFFEE
-    { productId: 1, category: 'COFFEE', name: 'Java House Espresso', basePrice: 3.00, availability: 'IN_STOCK' },
-    { productId: 2, category: 'COFFEE', name: 'Coffee Misto', basePrice: 4.00, availability: 'IN_STOCK' },
-    { productId: 3, category: 'COFFEE', name: 'Cappuccino', basePrice: 4.50, availability: 'IN_STOCK' },
-    { productId: 4, category: 'COFFEE', name: 'Caramel Macchiato', basePrice: 5.25, availability: 'IN_STOCK' },
-    { productId: 5, category: 'COFFEE', name: 'Mocha Frappuccino', basePrice: 6.50, availability: 'IN_STOCK' },
-    
-    // CUPCAKES
-    { productId: 11, category: 'CUPCAKES', name: 'Vanilla Bean Bliss', basePrice: 4.00, availability: 'IN_STOCK' },
-    { productId: 12, category: 'CUPCAKES', name: 'Red Velvet Dream', basePrice: 4.25, availability: 'IN_STOCK' },
-    { productId: 13, category: 'CUPCAKES', name: 'Triple Chocolate Overload', basePrice: 4.50, availability: 'IN_STOCK' },
-    { productId: 14, category: 'CUPCAKES', name: 'Lemon Zest Delight', basePrice: 4.00, availability: 'IN_STOCK' },
-    { productId: 15, category: 'CUPCAKES', name: 'Strawberry Shortcake', basePrice: 4.25, availability: 'IN_STOCK' },
-    
-    // COOKIES
-    { productId: 21, category: 'COOKIES', name: 'Signature Chocolate Chip', basePrice: 2.50, availability: 'IN_STOCK' },
-    { productId: 22, category: 'COOKIES', name: 'Oatmeal Cranberry White Chocolate', basePrice: 2.75, availability: 'IN_STOCK' },
-    { productId: 23, category: 'COOKIES', name: 'Double Fudge Brownie Cookie', basePrice: 3.00, availability: 'IN_STOCK' },
-    { productId: 24, category: 'COOKIES', name: 'Snickerdoodle', basePrice: 2.50, availability: 'IN_STOCK' },
-    
-    // CROISSANTS
-    { productId: 31, category: 'CROISSANTS', name: 'Classic Butter Croissant', basePrice: 3.75, availability: 'IN_STOCK' },
-    { productId: 32, category: 'CROISSANTS', name: 'Cinnamon Swirl Croissant', basePrice: 4.50, availability: 'IN_STOCK' },
-    { productId: 33, category: 'CROISSANTS', name: 'Chocolate Almond Croissant', basePrice: 4.75, availability: 'IN_STOCK' },
-    { productId: 34, category: 'CROISSANTS', name: 'Plain Croissant', basePrice: 3.50, availability: 'IN_STOCK' },
-    { productId: 35, category: 'CROISSANTS', name: 'Ham and Cheese Croissant', basePrice: 5.00, availability: 'IN_STOCK' },
-    
-    // PASTRIES
-    { productId: 41, category: 'PASTRIES', name: 'Cheese Danish', basePrice: 4.50, availability: 'IN_STOCK' },
-    { productId: 42, category: 'PASTRIES', name: 'Blueberry Muffin', basePrice: 3.50, availability: 'IN_STOCK' },
-    { productId: 43, category: 'PASTRIES', name: 'Apple Turnover', basePrice: 4.25, availability: 'IN_STOCK' },
-    { productId: 44, category: 'PASTRIES', name: 'Almond Croissant', basePrice: 4.75, availability: 'IN_STOCK' },
-    { productId: 45, category: 'PASTRIES', name: 'Chocolate Eclair', basePrice: 4.50, availability: 'IN_STOCK' },
-    
-    // SANDWICHES
-    { productId: 51, category: 'SANDWICHES', name: 'BLT Classic', basePrice: 7.50, availability: 'IN_STOCK' },
-    { productId: 52, category: 'SANDWICHES', name: 'Caprese Sandwich', basePrice: 8.00, availability: 'IN_STOCK' },
-    { productId: 53, category: 'SANDWICHES', name: 'Grilled Chicken Panini', basePrice: 8.50, availability: 'IN_STOCK' },
-    { productId: 54, category: 'SANDWICHES', name: 'Turkey Avocado Club', basePrice: 9.00, availability: 'IN_STOCK' },
-    { productId: 55, category: 'SANDWICHES', name: 'Veggie Delight', basePrice: 7.00, availability: 'IN_STOCK' },
-    
-    // SALADS
-    { productId: 61, category: 'SALADS', name: 'Caesar Salad', basePrice: 8.50, availability: 'IN_STOCK' },
-    { productId: 62, category: 'SALADS', name: 'Cobb Salad', basePrice: 9.50, availability: 'IN_STOCK' },
-    { productId: 63, category: 'SALADS', name: 'Garden Fresh Salad', basePrice: 7.50, availability: 'IN_STOCK' },
-    { productId: 64, category: 'SALADS', name: 'Grilled Chicken Salad', basePrice: 9.00, availability: 'IN_STOCK' },
-    { productId: 65, category: 'SALADS', name: 'Quinoa Power Bowl', basePrice: 9.75, availability: 'IN_STOCK' },
-    
-    // SMOOTHIES
-    { productId: 71, category: 'SMOOTHIES', name: 'Berry Blast Smoothie', basePrice: 5.50, availability: 'IN_STOCK' },
-    { productId: 72, category: 'SMOOTHIES', name: 'Chocolate Banana Smoothie', basePrice: 5.75, availability: 'IN_STOCK' },
-    { productId: 73, category: 'SMOOTHIES', name: 'Green Power Smoothie', basePrice: 6.00, availability: 'IN_STOCK' },
-    { productId: 74, category: 'SMOOTHIES', name: 'Peach Mango Smoothie', basePrice: 5.75, availability: 'IN_STOCK' },
-    { productId: 75, category: 'SMOOTHIES', name: 'Tropical Paradise Smoothie', basePrice: 6.25, availability: 'IN_STOCK' },
-];
 
 function ProductDetailPage() {
     const { productId } = useParams();
@@ -79,18 +22,11 @@ function ProductDetailPage() {
             setError(null);
 
             try {
-                let products = null;
-                try {
-                    const response = await fetch('/api/menu');
-                    if (response.ok) {
-                        products = await response.json();
-                    }
-                } catch (apiError) {
-                    console.log("API not available, using mock data");
-                }
-
+                // Fetch products from API
+                const products = await getMenuProducts();
+                
                 if (!products || products.length === 0) {
-                    products = mockProducts;
+                    throw new Error('No products available');
                 }
 
                 const foundProduct = products.find(p => p[PRODUCT_ID_FIELD_NAME] === parseInt(productId));
@@ -101,15 +37,13 @@ function ProductDetailPage() {
                 
                 setProduct(foundProduct);
 
+                // Fetch product description
                 try {
-                    const detailsResponse = await fetch(`/api/menu/description/${productId}`);
-                    if (detailsResponse.ok) {
-                        const details = await detailsResponse.json();
-                        setProductDetails(details);
-                    } else {
-                        setProductDetails({ description: `Delicious ${foundProduct.name} - a perfect choice for any time of day.` });
-                    }
+                    const details = await getProductDescription(productId);
+                    setProductDetails(details);
                 } catch (descError) {
+                    console.error("Error fetching description:", descError);
+                    // Set a default description if API fails
                     setProductDetails({ description: `Delicious ${foundProduct.name} - a perfect choice for any time of day.` });
                 }
             } catch (e) {

@@ -1,69 +1,35 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getProductImage } from '../assets/images/imageMap';
-
-const mockProducts = [
-    // COFFEE
-    { productId: 1, category: 'COFFEE', name: 'Java House Espresso', basePrice: 3.00, availability: 'IN_STOCK' },
-    { productId: 2, category: 'COFFEE', name: 'Coffee Misto', basePrice: 4.00, availability: 'IN_STOCK' },
-    { productId: 3, category: 'COFFEE', name: 'Cappuccino', basePrice: 4.50, availability: 'IN_STOCK' },
-    { productId: 4, category: 'COFFEE', name: 'Caramel Macchiato', basePrice: 5.25, availability: 'IN_STOCK' },
-    { productId: 5, category: 'COFFEE', name: 'Mocha Frappuccino', basePrice: 6.50, availability: 'IN_STOCK' },
-    
-    // CUPCAKES
-    { productId: 11, category: 'CUPCAKES', name: 'Vanilla Bean Bliss', basePrice: 4.00, availability: 'IN_STOCK' },
-    { productId: 12, category: 'CUPCAKES', name: 'Red Velvet Dream', basePrice: 4.25, availability: 'IN_STOCK' },
-    { productId: 13, category: 'CUPCAKES', name: 'Triple Chocolate Overload', basePrice: 4.50, availability: 'IN_STOCK' },
-    { productId: 14, category: 'CUPCAKES', name: 'Lemon Zest Delight', basePrice: 4.00, availability: 'IN_STOCK' },
-    { productId: 15, category: 'CUPCAKES', name: 'Strawberry Shortcake', basePrice: 4.25, availability: 'IN_STOCK' },
-    
-    // COOKIES
-    { productId: 21, category: 'COOKIES', name: 'Signature Chocolate Chip', basePrice: 2.50, availability: 'IN_STOCK' },
-    { productId: 22, category: 'COOKIES', name: 'Oatmeal Cranberry White Chocolate', basePrice: 2.75, availability: 'IN_STOCK' },
-    { productId: 23, category: 'COOKIES', name: 'Double Fudge Brownie Cookie', basePrice: 3.00, availability: 'IN_STOCK' },
-    { productId: 24, category: 'COOKIES', name: 'Snickerdoodle', basePrice: 2.50, availability: 'IN_STOCK' },
-    
-    // CROISSANTS
-    { productId: 31, category: 'CROISSANTS', name: 'Classic Butter Croissant', basePrice: 3.75, availability: 'IN_STOCK' },
-    { productId: 32, category: 'CROISSANTS', name: 'Cinnamon Swirl Croissant', basePrice: 4.50, availability: 'IN_STOCK' },
-    { productId: 33, category: 'CROISSANTS', name: 'Chocolate Almond Croissant', basePrice: 4.75, availability: 'IN_STOCK' },
-    { productId: 34, category: 'CROISSANTS', name: 'Plain Croissant', basePrice: 3.50, availability: 'IN_STOCK' },
-    { productId: 35, category: 'CROISSANTS', name: 'Ham and Cheese Croissant', basePrice: 5.00, availability: 'IN_STOCK' },
-    
-    // PASTRIES
-    { productId: 41, category: 'PASTRIES', name: 'Cheese Danish', basePrice: 4.50, availability: 'IN_STOCK' },
-    { productId: 42, category: 'PASTRIES', name: 'Blueberry Muffin', basePrice: 3.50, availability: 'IN_STOCK' },
-    { productId: 43, category: 'PASTRIES', name: 'Apple Turnover', basePrice: 4.25, availability: 'IN_STOCK' },
-    { productId: 44, category: 'PASTRIES', name: 'Almond Croissant', basePrice: 4.75, availability: 'IN_STOCK' },
-    { productId: 45, category: 'PASTRIES', name: 'Chocolate Eclair', basePrice: 4.50, availability: 'IN_STOCK' },
-    
-    // SANDWICHES
-    { productId: 51, category: 'SANDWICHES', name: 'BLT Classic', basePrice: 7.50, availability: 'IN_STOCK' },
-    { productId: 52, category: 'SANDWICHES', name: 'Caprese Sandwich', basePrice: 8.00, availability: 'IN_STOCK' },
-    { productId: 53, category: 'SANDWICHES', name: 'Grilled Chicken Panini', basePrice: 8.50, availability: 'IN_STOCK' },
-    { productId: 54, category: 'SANDWICHES', name: 'Turkey Avocado Club', basePrice: 9.00, availability: 'IN_STOCK' },
-    { productId: 55, category: 'SANDWICHES', name: 'Veggie Delight', basePrice: 7.00, availability: 'IN_STOCK' },
-    
-    // SALADS
-    { productId: 61, category: 'SALADS', name: 'Caesar Salad', basePrice: 8.50, availability: 'IN_STOCK' },
-    { productId: 62, category: 'SALADS', name: 'Cobb Salad', basePrice: 9.50, availability: 'IN_STOCK' },
-    { productId: 63, category: 'SALADS', name: 'Garden Fresh Salad', basePrice: 7.50, availability: 'IN_STOCK' },
-    { productId: 64, category: 'SALADS', name: 'Grilled Chicken Salad', basePrice: 9.00, availability: 'IN_STOCK' },
-    { productId: 65, category: 'SALADS', name: 'Quinoa Power Bowl', basePrice: 9.75, availability: 'IN_STOCK' },
-    
-    // SMOOTHIES
-    { productId: 71, category: 'SMOOTHIES', name: 'Berry Blast Smoothie', basePrice: 5.50, availability: 'IN_STOCK' },
-    { productId: 72, category: 'SMOOTHIES', name: 'Chocolate Banana Smoothie', basePrice: 5.75, availability: 'IN_STOCK' },
-    { productId: 73, category: 'SMOOTHIES', name: 'Green Power Smoothie', basePrice: 6.00, availability: 'IN_STOCK' },
-    { productId: 74, category: 'SMOOTHIES', name: 'Peach Mango Smoothie', basePrice: 5.75, availability: 'IN_STOCK' },
-    { productId: 75, category: 'SMOOTHIES', name: 'Tropical Paradise Smoothie', basePrice: 6.25, availability: 'IN_STOCK' },
-];
+import { getMenuProducts } from '../services/MenuService';
 
 function MenuPage() {
     const navigate = useNavigate();
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
-    const products = mockProducts;
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchProducts = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const data = await getMenuProducts();
+                console.log('Products loaded from API:', data);
+                setProducts(data);
+            } catch (err) {
+                console.error('Error fetching products:', err);
+                setError(err.message || 'Failed to load products. Please try again later.');
+                setProducts([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProducts();
+    }, []);
 
     const formatCategoryName = (category) => {
         if (!category) return 'Other';
@@ -170,7 +136,30 @@ function MenuPage() {
                         </div>
                     </div>
 
-                    {filteredProducts.length === 0 ? (
+                    {loading ? (
+                        <div className="text-center py-12">
+                            <p className="text-xl text-amber-700">Loading products...</p>
+                        </div>
+                    ) : error ? (
+                        <div className="text-center py-12">
+                            <p className="text-xl text-red-600 mb-4 font-semibold">{error}</p>
+                            <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 max-w-2xl mx-auto text-left mb-4">
+                                <h3 className="font-bold text-amber-900 mb-2">Troubleshooting Steps:</h3>
+                                <ol className="list-decimal list-inside space-y-2 text-amber-800">
+                                    <li>Check if the Spring Boot backend is running on port 8080</li>
+                                    <li>Verify the database (cafe_db) exists and is accessible</li>
+                                    <li>Check browser console (F12) for detailed error messages</li>
+                                    <li>Try accessing the API directly: <a href="http://localhost:8080/api/menu" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">http://localhost:8080/api/menu</a></li>
+                                </ol>
+                            </div>
+                            <button
+                                onClick={() => window.location.reload()}
+                                className="px-6 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-semibold"
+                            >
+                                Retry
+                            </button>
+                        </div>
+                    ) : filteredProducts.length === 0 ? (
                         <div className="text-center py-12">
                             <p className="text-xl text-amber-700">
                                 {searchQuery ? `No products found matching "${searchQuery}"` : 'No products available at this time.'}
