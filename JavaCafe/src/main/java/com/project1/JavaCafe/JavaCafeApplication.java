@@ -14,9 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
+
 
 @SpringBootApplication
 public class JavaCafeApplication {
@@ -39,6 +37,7 @@ public class JavaCafeApplication {
                 // Spring safely calls the service method here after everything is ready
                 productsService.initializeTable();
 
+
                 // ADD GUEST USER LOGIC
                 if (appUserRepository.findByEmail("guest.user@cafe.com").isEmpty()) {
 
@@ -54,6 +53,7 @@ public class JavaCafeApplication {
                     appUserRepository.save(adminUser);
                     System.out.println("--- Created Guest User ---");
                 }
+
 
                 // Check if a test user exists to prevent duplicates
                 if (appUserRepository.findByEmail("test.user@cafe.com").isEmpty()) {

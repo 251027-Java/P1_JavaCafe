@@ -19,9 +19,20 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+
+
     // Auth Records
+//    public record AuthRequest(String email, String password){}
+//    public record AuthResponse(String token){}
+
     public record AuthRequest(String email, String password){}
-    public record AuthResponse(String token){}
+    public record AuthResponse(
+            String token,
+            Long userId,
+            String email,
+            String firstName, // 🚀 ADDED
+            String lastName   // 🚀 ADDED
+    ){}
 
 
     // Fields
@@ -61,11 +72,18 @@ public class AuthController {
         String token = jwtUtil.generateToken(
                 userId,
                 user.getEmail(),
-                user.getUserRole() // <-- CRITICAL CHANGE: Pass the role string here
+                user.getUserRole()
+                // <-- CRITICAL CHANGE: Pass the role string here
         );
 
         // 4. Return the token
-        return new AuthResponse(token);
+        return new AuthResponse(
+                token,
+                user.getUserId(),
+                user.getEmail(),
+                user.getFirstName(), // 🚀 ADDED
+                user.getLastName()   // 🚀 ADDED
+        );
     }
 
     @PostMapping("/register")
@@ -88,7 +106,13 @@ public class AuthController {
             );
 
             // 3. Return the token to the frontend
-            return new AuthResponse(token);
+            return new AuthResponse(
+                    token,
+                    user.userId(),
+                    user.email(),
+                    user.firstName(), // 🚀 ADDED
+                    user.lastName()   // 🚀 ADDED
+            );
 
         } catch (IllegalArgumentException e) {
             // Handle the specific exception thrown by AppUserService if the email exists

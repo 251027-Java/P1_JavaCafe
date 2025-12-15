@@ -19,25 +19,29 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry reg) {
         // adding interceptors to the list of active/running interceptors
         // that are scanning requests as they come in
-        reg.addInterceptor(jwtInterceptor) 
+        reg.addInterceptor(jwtInterceptor)
                 .addPathPatterns("/api/**") // Apply to all /api/ paths
-                
+
                 // EXCLUSIONS: Allow these paths without a token
                 .excludePathPatterns(
-                        "/api/auth/login", 
+                        "/api",
+                        "/api/auth/login",
                         "/api/auth/register",
-                        "/api/menu", 
+                        "/api/menu",
                         "/api/menu/**",
                         "/api/contact",
                         "/api/contact/**",
-                        "/api/cart"
+                        "/api/cart",
+
+                        // *** 🔑 CRITICAL FIX: EXCLUDE GUEST ORDER SUBMISSION 🔑 ***
+                        "/api/cart/guest/submit" // <-- ADD THIS LINE
                 );
     }
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**") // Apply CORS rules to all paths starting with /api
-                .allowedOrigins("http://localhost:3000") // <-- **CRITICAL LINE**
+                .allowedOrigins("http://localhost:3000") //Critical line
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Allow all necessary HTTP methods
                 .allowedHeaders("*") // Allow all request headers
                 .allowCredentials(true);

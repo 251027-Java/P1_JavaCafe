@@ -79,28 +79,7 @@ public class AppUserService {
         }
     }
 
-    // Renamed and secured method for user registration
-    public AppUserDTO registerNewCustomer(AppUserWOIDDTO dto) {
-        // 1. Business Logic: Check if email already exists
-        if (repository.findByEmail(dto.email()).isPresent()) {
-            throw new IllegalArgumentException("Email already in use.");
-        }
 
-        // 2. Security: HASH the raw password before creating the entity
-        String hashedPassword = passwordEncoder.encode(dto.password());
-
-        // 3. Create the entity using the HASHED password
-        AppUser user = new AppUser(
-                dto.email(),
-                hashedPassword, //Use the HASHED password
-                dto.userRole(),
-                dto.firstName(),
-                dto.lastName()
-        );
-
-        // 4. Save and return DTO
-        return AppUserToDto(repository.save(user));
-    }
 
 
 }

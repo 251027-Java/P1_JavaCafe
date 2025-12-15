@@ -19,6 +19,12 @@ public class JwtInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
+        // 🔑 CRITICAL FIX: Allow CORS preflight requests (OPTIONS method) to pass immediately
+        // The framework's CORS filter will handle the headers and status for these requests.
+        if (request.getMethod().equalsIgnoreCase("OPTIONS")) {
+            return true;
+        }
+
         // 1. Authentication Check (Token Presence)
         String authHeader = request.getHeader("Authorization");
 
@@ -27,6 +33,7 @@ public class JwtInterceptor implements HandlerInterceptor {
             response.getWriter().write("Unauthorized: Missing or invalid token format.");
             return false;
         }
+        // ... (rest of the logic remains the same)
 
         String token = authHeader.substring(7);
 
@@ -61,8 +68,6 @@ public class JwtInterceptor implements HandlerInterceptor {
         }
 
         // Rule: Optional check for /api/orders (requires any authenticated user with a valid role)
-        // Since the token is valid, this check is primarily to ensure the role is either
-        // ADMIN or CUSTOMER, which should be redundant if your tokens are always correct.
         if (requestUri.startsWith("/api/orders")) {
             if (!"ADMIN".equals(userRole) && !"CUSTOMER".equals(userRole)) {
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);

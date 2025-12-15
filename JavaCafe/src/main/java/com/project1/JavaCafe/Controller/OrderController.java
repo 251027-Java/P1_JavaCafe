@@ -11,14 +11,12 @@ import jakarta.validation.constraints.Null;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 
 @RestController
-@RequestMapping("/api/cart") // domain:port/api/expenses
+@RequestMapping("/api/cart") // Maps to: domain:port/api/cart
 public class OrderController {
 
     private final CustomerOrdersService orderService;
@@ -31,9 +29,9 @@ public class OrderController {
         this.productsService = productsService;
     }
 
+    // --- EXISTING: Get Products (Menu) ---
     @GetMapping
     public ResponseEntity<List<ProductsDTO>> getProducts(
-            // IMPORTANT: Change from Long categoryId to String categoryName
             @RequestParam(required = false) String categoryName
     ) {
         List<ProductsDTO> products = productsService.findAllOrFilterByCategory(categoryName);
@@ -44,124 +42,117 @@ public class OrderController {
         return ResponseEntity.ok(products);
     }
 
-    @PostMapping("/guest/submit") // Use a clear endpoint path for guests
+    // --- EXISTING: Guest Checkout ---
+    @PostMapping("/guest/submit") // Maps to: /api/cart/guest/submit
     public ResponseEntity<CustomerOrdersDTO> submitPublicOrder(
-            @RequestBody GuestCheckoutDTO guestOrderDetails, // 1. Use the correct DTO
-            HttpServletRequest request // Optional, but can be kept
+            @RequestBody GuestCheckoutDTO guestOrderDetails,
+            HttpServletRequest request
     ) {
-
-        // --- Authentication Logic Removed ---
-        // NO token/userId check needed. The service layer handles creating the guest user.
-
-        // Safety check: Ensure cart items and essential guest info are present
         if (guestOrderDetails.email() == null || guestOrderDetails.items() == null || guestOrderDetails.items().isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         try {
-            // 2. Call the Order Service method, passing the complete GuestCheckoutDTO
             CustomerOrdersDTO newOrder = orderService.createGuestOrder(guestOrderDetails);
-
             return new ResponseEntity<>(newOrder, HttpStatus.CREATED);
 
         } catch (RuntimeException e) {
-            // Handle specific exceptions from the service layer (e.g., product not found)
             // Log the error (e.getMessage())
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-
-
-
-    // Inside OrderController.java (Temporary setup)
-    @PostMapping("/new") //
-    public ResponseEntity<CustomerOrdersDTO> createOrder(
-            @RequestBody CustomerOrdersWOIDDTO orderDetailsDTO, //Email is inside here
+    // 🚀 NEW ENDPOINT: Member Checkout 🚀
+    // This is the endpoint the React frontend is looking for after successful login.
+    @PostMapping("/member/submit") // Maps to: /api/cart/member/submit
+    public ResponseEntity<CustomerOrdersDTO> submitMemberOrder(
+            // The DTO must match the structure sent from React (items and total).
+            @RequestBody CustomerOrdersWOIDDTO orderDetailsDTO,
             HttpServletRequest request
     ) {
-        // 1. Get the email from the DTO
-//        String userEmail = orderDetailsDTO.email();
-//
-//        if (userEmail == null || userEmail.trim().isEmpty()) {
-//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-//        }
+        // 1. Get the authenticated user ID from the request attribute.
+        // The JwtInterceptor places this here after validating the token.
+        Long userId = (Long) request.getAttribute("userId");
 
-        // The JwtInterceptor placed this identity here after validating the token.
-        //String userEmail = (String) request.getAttribute("email");
-        Long userId = (Long) request.getAttribute("userId"); // Check for casting
         if (userId == null) {
-            // This case should ideally be caught by the interceptor/security filter,
-            // safety check if a token was invalid or missing the claim.
+            // Safety check: Should not be reached if interceptor is configured correctly
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
-        // 2. Call the AppUserService to look up the ID
-        //Long userId = appService.getUserIdAfterLogin(userEmail);
+        // 2. Safety check: Ensure cart items are present
+        if (orderDetailsDTO.items() == null || orderDetailsDTO.items().isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
 
-        // 3. Pass the userId and the rest of the DTO to the Order Service
-        CustomerOrdersDTO newOrder = orderService.create(orderDetailsDTO, userId);
+        try {
+            // 3. Call the Order Service method, passing the DTO and the secure userId
+            // Assuming your orderService.create() is designed to handle this.
+            CustomerOrdersDTO newOrder = orderService.create(orderDetailsDTO, userId);
 
-        return new ResponseEntity<>(newOrder, HttpStatus.CREATED);
+            return new ResponseEntity<>(newOrder, HttpStatus.CREATED);
+
+        } catch (RuntimeException e) {
+            // Handle exceptions from the service layer (e.g., product not found, bad data)
+            // Log the error (e.getMessage())
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
-    //findOrderById
+    // --- EXISTING: Temporary createOrder is now redundant, you can remove it or keep it renamed ---
+    // If '/member/submit' serves the same purpose, you should remove this method:
+    /*
+    @PostMapping("/new")
+    public ResponseEntity<CustomerOrdersDTO> createOrder(
+            @RequestBody CustomerOrdersWOIDDTO orderDetailsDTO,
+            HttpServletRequest request
+    ) {
+        Long userId = (Long) request.getAttribute("userId");
+        if (userId == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        CustomerOrdersDTO newOrder = orderService.create(orderDetailsDTO, userId);
+        return new ResponseEntity<>(newOrder, HttpStatus.CREATED);
+    }
+    */
+
+
+    // --- EXISTING: findOrderById ---
     @GetMapping("/{id}") //practice RESTful path: GET /api/orders/123
     public ResponseEntity<CustomerOrdersSummaryDTO> getById(
-            @PathVariable Integer id, // Corrected type: Use Long for Order ID
-            HttpServletRequest request // Required to securely get the user's identity
+            @PathVariable Integer id,
+            HttpServletRequest request
     ) {
-        // 1. Get the authenticated user's email from the request attribute.
-        // The JwtInterceptor puts this here after validating the token.
+        // ... (existing logic)
         String userEmail = (String) request.getAttribute("email");
-
-        // Safety check: Should not happen if JwtInterceptor works correctly
         if (userEmail == null) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-
-        // 2. Convert the secure email back to the internal user ID.
-        // This call is only necessary because you stored the email in the JWT, not the ID.
         Long userId = appService.getUserIdAfterLogin(userEmail);
-
-        // 3. Call the secure service method
-        // This method ensures the order with ID 'id' belongs to 'userId'.
         CustomerOrdersSummaryDTO order = orderService.getByIdAndUserId(id, userId);
 
         if (order == null) {
-            // Return 404 NOT FOUND if:
-            // a) The order ID doesn't exist, OR
-            // b) The order exists but belongs to a different user.
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-
         return new ResponseEntity<>(order, HttpStatus.OK);
     }
 
+    // --- EXISTING: getDetailsWithItems ---
     @GetMapping("/{id}/items") // Maps to: GET /api/orders/123/items
     public ResponseEntity<CustomerOrdersDTO> getDetailsWithItems(
             @PathVariable Integer id,
             HttpServletRequest request
     ) {
-        // 1. Get the authenticated user's ID (same security logic as above)
+        // ... (existing logic)
         String userEmail = (String) request.getAttribute("email");
         if (userEmail == null) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         Long userId = appService.getUserIdAfterLogin(userEmail);
-
-        // 2. Call the NEW service method designed for detailed retrieval
-        // Note: The service layer MUST ensure this call eagerly loads the OrderItems.
         CustomerOrdersDTO details = orderService.getDetailsWithItems(id, userId);
 
         if (details == null) {
-            // Returns 404 if order is not found OR if user is not the owner
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-
-        // 3. Return the full DTO (including the nested list of items)
         return new ResponseEntity<>(details, HttpStatus.OK);
     }
-
-
 }

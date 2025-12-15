@@ -39,6 +39,8 @@ public class JwtUtil {
         claims.put("role", userRole);
         claims.put("userId", userId);
 
+
+
         return Jwts.builder()
                 .claims(claims) // <-- 3. Include the claims map
                 .subject(email)

@@ -27,7 +27,7 @@ public class ProductsService {
     // Methods
     private MenuProductsDTO productToMenuDto(Products product) {
 
-        // No logic here to map order.getOrderItems()
+
 
         return new MenuProductsDTO(
                 product.getProductId(),
@@ -35,7 +35,7 @@ public class ProductsService {
                 product.getName(),
                 product.getBasePrice(),
                 product.getAvailability()
-                // No item list passed here
+
         );
     }
 
@@ -146,45 +146,45 @@ public class ProductsService {
         String availability
      */
 
-    public ProductsDTO update(Long id, ProductsDTO dto) {
-
-        // 1. Find the existing product entity by ID. Throws 404 if not found.
-        Products product = repository.findById(id)
-                .orElseThrow(
-                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found with ID: " + id)
-                );
-
-        // 2. Update the fields of the retrieved 'product' entity using the 'dto' fields
-
-        // Check if the DTO field is not null before setting (optional, but good practice for PATCH-like updates)
-        if (dto.category() != null) {
-            product.setCategory(dto.category());
-        }
-
-        if (dto.name() != null) {
-            product.setName(dto.name());
-        }
-
-        if (dto.basePrice() != null) {
-            product.setBasePrice(dto.basePrice());
-        }
-
-        if (dto.description() != null) {
-            product.setDescription(dto.description());
-        }
-
-        // Assuming availability is either a String or an Enum
-        if (dto.availability() != null) {
-            product.setAvailability(dto.availability());
-        }
-
-        // 3. Save the updated entity back to the database.
-        Products updatedProduct = repository.save(product);
-
-        // 4. Convert the saved entity back to the DTO without ID for the response.
-        // NOTE: Replace 'ProductToDto' with your actual conversion method name.
-        return ProductsToDto(updatedProduct);
-    }
+//    public ProductsDTO update(Long id, ProductsDTO dto) {
+//
+//        // 1. Find the existing product entity by ID. Throws 404 if not found.
+//        Products product = repository.findById(id)
+//                .orElseThrow(
+//                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found with ID: " + id)
+//                );
+//
+//        // 2. Update the fields of the retrieved 'product' entity using the 'dto' fields
+//
+//        // Check if the DTO field is not null before setting (optional, but good practice for PATCH-like updates)
+//        if (dto.category() != null) {
+//            product.setCategory(dto.category());
+//        }
+//
+//        if (dto.name() != null) {
+//            product.setName(dto.name());
+//        }
+//
+//        if (dto.basePrice() != null) {
+//            product.setBasePrice(dto.basePrice());
+//        }
+//
+//        if (dto.description() != null) {
+//            product.setDescription(dto.description());
+//        }
+//
+//        // Assuming availability is either a String or an Enum
+//        if (dto.availability() != null) {
+//            product.setAvailability(dto.availability());
+//        }
+//
+//        // 3. Save the updated entity back to the database.
+//        Products updatedProduct = repository.save(product);
+//
+//        // 4. Convert the saved entity back to the DTO without ID for the response.
+//        // NOTE: Replace 'ProductToDto' with your actual conversion method name.
+//        return ProductsToDto(updatedProduct);
+//    }
 
     public void initializeTable() {
         // Use count() to check if the table has any records

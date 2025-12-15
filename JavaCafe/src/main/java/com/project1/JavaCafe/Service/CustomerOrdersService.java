@@ -15,17 +15,11 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;   // Ensure this import is present
-import java.util.List;        // Ensure this import is present
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors; // <-- NEW Import
+import java.util.stream.Collectors;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.ArrayList;   // Ensure this import is present
-import java.util.List;        // Ensure this import is present
-import java.util.Optional;
-import java.util.stream.Collectors; // <-- NEW Import
 
 @Service
 public class CustomerOrdersService {
@@ -43,28 +37,31 @@ public class CustomerOrdersService {
         this.IRepo = IRepo;
     }
 
+    // Methods
+
     public CustomerOrdersDTO createGuestOrder(GuestCheckoutDTO guestOrder) {
 
-        // ----------------------------------------------------
-        // 1. CREATE AppUser ENTRY (Generates userId)
-        // ----------------------------------------------------
+        // 1. FIND OR CREATE AppUser ENTRY (The FIX for returning guests)
 
-        // Create the AppUser entry, using the guest data and a null password
-        AppUser newGuestUser = new AppUser(
-                guestOrder.email(),          // Required field from input DTO
-                null,                        // Allowed due to nullable=true constraint
-                "GUEST",                     // Role is set to GUEST
-                guestOrder.firstName(),
-                guestOrder.lastName()
-        );
+        // Attempt to find an existing user (guest or member) with the provided email.
+        AppUser user = ARepo.findByEmail(guestOrder.email())
+                .orElseGet(() -> {
+                    // If NO user is found (first-time guest), create a new GUEST profile.
+                    AppUser newGuestUser = new AppUser(
+                            guestOrder.email(),
+                            null, // Password is null for guests
+                            "GUEST", // Role is explicitly GUEST
+                            guestOrder.firstName(),
+                            guestOrder.lastName()
+                    );
 
-        // Save the new user. The database generates the userId here.
-        AppUser savedGuestUser = ARepo.save(newGuestUser);
-        AppUser user = savedGuestUser; // This object now holds the generated userId
+                    // Save and return the newly created guest user.
+                    return ARepo.save(newGuestUser);
+                });
 
-        // ----------------------------------------------------
-        // 2. CALCULATE AND CREATE OrderItems
-        // ----------------------------------------------------
+        // The 'user' variable now holds the AppUser entity, whether it was found or created.
+
+        // 2. CALCULATE AND CREATE OrderItems (This block remains UNCHANGED)
 
         BigDecimal calculatedTotalCost = BigDecimal.ZERO;
         List<OrderItems> orderItemsToSave = new ArrayList<>();
@@ -90,16 +87,14 @@ public class CustomerOrdersService {
             orderItemsToSave.add(item);
         }
 
-        // ----------------------------------------------------
         // 3. CREATE CustomerOrders ENTRY (Links all three)
-        // ----------------------------------------------------
 
-        // Create the main Order entity
+        // Create the main Order
         CustomerOrders order = new CustomerOrders(
-                user, // <-- LINKED to the savedGuestUser (with generated userId)
+                user, // 🎯 Now linked to the found or newly created 'user' object
                 calculatedTotalCost,
                 LocalDate.now(),
-                "PENDING"
+                "Confirmed"
         );
 
         // Establish bidirectional link for cascade save
@@ -116,36 +111,35 @@ public class CustomerOrdersService {
 
 
 
-
-
-
-
-
-
-
-
-
-//////////////////////////////////////////////
-
-    // Methods
-    // The method takes the order details DTO AND the userId (a Long)
+    // 🚀 MEMBER ORDER CREATION 🚀
     public CustomerOrdersDTO create(CustomerOrdersWOIDDTO dto, Long userId) {
 
-        // 1. Fetch AppUser
+        // 1. Fetch AppUser (Unchanged)
         AppUser user = ARepo.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+
+        // CRITICAL FIX: Ensure the items list exists before processing (Passed previous check)
+        if (dto.items() == null || dto.items().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Order must contain items.");
+        }
 
         BigDecimal calculatedTotalCost = BigDecimal.ZERO;
         List<OrderItems> orderItemsToSave = new ArrayList<>();
 
-        // ... (Loop remains the same: calculates cost and creates OrderItems entity) ...
+        // 2. Calculate and Create OrderItems
         for (OrderItemsWOIDDTO itemDto : dto.items()) {
-            // ... (product lookup, price calculation) ...
+
+            // 🔑 NEW FIX: Null check for quantity
+            if (itemDto.quantity() == null || itemDto.quantity() <= 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Item quantity is missing or invalid for product ID: " + itemDto.productId());
+            }
+
+            // Fetch authoritative price
             Products product = PRepo.findById(itemDto.productId())
-                    .orElseThrow(() -> new RuntimeException("Product not found with ID: " + itemDto.productId()));
-            // ... (exception handling) ...
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product not found with ID: " + itemDto.productId()));
 
             BigDecimal unitPrice = product.getBasePrice();
+            // Safe to call quantity() now that we've checked it is not null and > 0
             BigDecimal lineItemCost = unitPrice.multiply(BigDecimal.valueOf(itemDto.quantity()));
             calculatedTotalCost = calculatedTotalCost.add(lineItemCost);
 
@@ -158,7 +152,7 @@ public class CustomerOrdersService {
             orderItemsToSave.add(item);
         }
 
-        // 5. Create the CustomerOrders entity
+        // 3. Create the CustomerOrders entity (Unchanged)
         String DEFAULT_STATUS = "PENDING";
         LocalDate creationDate = LocalDate.now();
 
@@ -169,39 +163,20 @@ public class CustomerOrdersService {
                 DEFAULT_STATUS
         );
 
-        // --- CRITICAL FIX START: Link child entities to the parent entity ---
-
         for (OrderItems item : orderItemsToSave) {
-            // 1. Set the Bi-directional link from child to parent (sets the FK)
             item.setOrder(order);
-
-            // 2. Add the child to the parent's collection (updates the parent's in-memory list)
-            // Since you are using Lombok @Data, you might not have an add method, so use the setter:
-            order.getOrderItems().add(item); // <-- Assumes the list is initialized (your previous fix)
         }
+        order.setOrderItems(orderItemsToSave);
 
-        // 6. Save the parent entity ONLY. The items are saved automatically via CASCADE.
-        // This transaction saves the CustomerOrders and all linked OrderItems.
+
+        // 4. Save the parent entity ONLY. (Unchanged)
         CustomerOrders savedOrder = CRepo.save(order);
 
-        // 7. Remove item saving loop (IRepo.save is no longer needed)
-        // The savedOrder object now contains the full and correct orderItems list in memory.
 
         return orderToDetailDto(savedOrder);
     }
 
     private OrderItemsDTO OrderItemsToDto(OrderItems item) {
-        // Requires OrderItemsDTO to be defined as a record:
-        // public record OrderItemsDTO(Integer productId, String productName, Integer quantity, BigDecimal unitPrice) {}
-        /*
-        Integer itemId,
-        Integer orderId,
-        Integer productId,
-        Integer Quantity,
-        BigDecimal unitPrice,
-        String ProductName
-) {}
-        * */
 
         return new OrderItemsDTO(
                 item.getItemId(),
@@ -216,22 +191,21 @@ public class CustomerOrdersService {
     private CustomerOrdersDTO orderToDetailDto(CustomerOrders order) {
         // 1. Map the nested OrderItems list to OrderItemsDTO list
         List<OrderItemsDTO> itemDTOs = order.getOrderItems().stream()
-                .map(this::OrderItemsToDto) // Use the item helper method
+                .map(this::OrderItemsToDto)
                 .collect(Collectors.toList());
 
         return new CustomerOrdersDTO(
-                order.getOrderId(),   // 1
-                order.getUser().getUserId(),    // 2
-                order.getTotalCost(),        // 3
-                order.getOrderDate(),   // 4
-                order.getStatus(), // 5
+                order.getOrderId(),
+                order.getUser().getUserId(),
+                order.getTotalCost(),
+                order.getOrderDate(),
+                order.getStatus(),
                 itemDTOs
         );
     }
 
     private CustomerOrdersSummaryDTO orderToSummaryDto(CustomerOrders order) {
 
-        // No logic here to map order.getOrderItems()
 
         return new CustomerOrdersSummaryDTO(
                 order.getOrderId(),
@@ -239,57 +213,53 @@ public class CustomerOrdersService {
                 order.getTotalCost(),
                 order.getOrderDate(),
                 order.getStatus()
-                // No item list passed here
+
         );
     }
 
-    public CustomerOrdersSummaryDTO update(Integer id, CustomerOrdersSummaryDTO dto) { // Note the DTO change
+//    public CustomerOrdersSummaryDTO update(Integer id, CustomerOrdersSummaryDTO dto) { //
+//
+//        // 1. Find the existing order entity by ID.
+//        CustomerOrders order = CRepo.findById(id)
+//                .orElseThrow(
+//                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found with ID: " + id)
+//                );
+//
+//        // 2. Apply updates using null checks (PATCH logic)
+//
+//        if (dto.status() != null) {
+//            order.setStatus(dto.status());
+//        }
+//
+//
+//        if (dto.totalCost() != null) {
+//            order.setTotalCost(dto.totalCost());
+//        }
+//
+//
+//        if (dto.orderDate() != null) {
+//            order.setOrderDate(dto.orderDate());
+//        }
+//
+//
+//        CustomerOrders updatedOrder = CRepo.save(order);
+//
+//        return orderToSummaryDto(updatedOrder); // Replace with your actual conversion method name
+//    }
 
-        // 1. Find the existing order entity by ID.
-        // Ensure CRepo is JpaRepository<CustomerOrders, Integer>
-        CustomerOrders order = CRepo.findById(id)
-                .orElseThrow(
-                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found with ID: " + id)
-                );
-
-        // 2. Apply updates using null checks (PATCH logic)
-
-        // Check 1: Update Status (Most common for orders)
-        if (dto.status() != null) {
-            order.setStatus(dto.status());
-        }
-
-        // Check 2: Update Total Cost (If total calculation needs manual override)
-        if (dto.totalCost() != null) {
-            order.setTotalCost(dto.totalCost());
-        }
-
-        // Check 3: Update Order Date (If required, though rare)
-        if (dto.orderDate() != null) {
-            order.setOrderDate(dto.orderDate());
-        }
-
-        // 3. Save the updated entity back to the database.
-        CustomerOrders updatedOrder = CRepo.save(order); // Save the order entity
-
-        // 4. Convert the saved entity back to the DTO for the response.
-        // NOTE: You need to use your OrderToSummaryDto conversion method here.
-        return orderToSummaryDto(updatedOrder); // Replace with your actual conversion method name
-    }
-
-    public List<CustomerOrdersSummaryDTO> getAllOrders() {
-
-        // Define the statuses you want to include
-        final List<String> targetStatuses = List.of("PENDING", "PICKUP");
-
-        // 1. Use the new repository method to fetch only the filtered orders
-        List<CustomerOrders> filteredOrders = CRepo.findByStatusIn(targetStatuses);
-
-        // 2. Stream the filtered list and convert each entity to a DTO
-        return filteredOrders.stream()
-                .map(this::orderToSummaryDto)
-                .toList(); // or collect(Collectors.toList());
-    }
+//    public List<CustomerOrdersSummaryDTO> getAllOrders() {
+//
+//        // Define the statuses you want to include
+//        final List<String> targetStatuses = List.of("PENDING", "PICKUP");
+//
+//        // 1. Use the new repository method to fetch only the filtered orders
+//        List<CustomerOrders> filteredOrders = CRepo.findByStatusIn(targetStatuses);
+//
+//        // 2. Stream the filtered list and convert each entity to a DTO
+//        return filteredOrders.stream()
+//                .map(this::orderToSummaryDto)
+//                .toList(); // or collect(Collectors.toList());
+//    }
 
     public CustomerOrdersSummaryDTO getByIdAndUserId(Integer orderId, Long userId) {
 
