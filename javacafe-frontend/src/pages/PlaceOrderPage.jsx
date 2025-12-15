@@ -11,11 +11,11 @@ const backendUrl = 'http://localhost:8080';
 
 function PlaceOrderPage() {
     const { 
-        cartItems,          
-        updateQuantity,     
-        clearCart,          
-        removeItem,         
-        cartTotal           
+        cartItems, 
+        updateQuantity, 
+        clearCart, 
+        removeItem, 
+        cartTotal 
     } = useCart();
     
     // INITIALIZE HOOKS
@@ -35,7 +35,6 @@ function PlaceOrderPage() {
     const [isProcessingOrder, setIsProcessingOrder] = useState(false);
     const [finalOrderTotal, setFinalOrderTotal] = useState(null); 
     const [confirmationMessage, setConfirmationMessage] = useState(null); 
-    // Correct syntax from setOrderError(null) to useState(null)
     const [orderError, setOrderError] = useState(null); 
         
     // Guest Customer Information and form visibility
@@ -137,9 +136,6 @@ function PlaceOrderPage() {
     }, [cartItems, cartTotal, clearCart, getToken, user, isProcessingOrder, confirmationMessage, backendUrl]); 
 
 
-    // REMOVED: The auto-submit useEffect for authenticated users is deliberately 
-    // removed to ensure explicit submission via the "Place Order" button.
-
     // --- Guest Order Functionality (Unchanged) ---
     const submitGuestOrder = async () => {
         if (cartItems.length === 0) {
@@ -216,7 +212,7 @@ function PlaceOrderPage() {
         submitGuestOrder();
     };
 
-    // --- Checkout Flow Functions (Unchanged) ---
+    // --- Checkout Flow Functions (Modified Navigation) ---
     const handleStartCheckout = () => {
         if (cartItems.length === 0) {
             alert("Your cart is empty. Please add items before checking out.");
@@ -235,10 +231,12 @@ function PlaceOrderPage() {
     };
     
     const handleLogin = () => {
+        // Navigates to the base login path
         navigate('/api/auth/login', { state: { from: location.pathname } }); 
     };
 
     const handleCreateAccount = () => {
+        // 🚀 UPDATED: Navigate directly to the /api/auth/register path
         navigate('/api/auth/register', { state: { from: location.pathname } }); 
     };
     
