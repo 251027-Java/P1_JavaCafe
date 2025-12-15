@@ -39,7 +39,7 @@ public class ProductsService {
         );
     }
 
-    // IMPORTANT: Accepts a String categoryName (which can be null for "All")
+    // Accepts a String categoryName (can be null for "All")
     public List<ProductsDTO> findAllOrFilterByCategory(String categoryName) {
         List<Products> products;
 
@@ -61,7 +61,7 @@ public class ProductsService {
 
         return new ProductsDTO(
                 product.getProductId(),
-                catName, // Uses the category name string
+                catName, // Uses category name
                 product.getName(),
                 product.getBasePrice(),
                 product.getDescription(),
@@ -77,25 +77,23 @@ public class ProductsService {
 
     private ProductsDTO ProductsToDto(Products product) {
         return new ProductsDTO(
-                product.getProductId(),   // 1
-                product.getCategory(),    // 2
-                product.getName(),        // 3
-                product.getBasePrice(),   // 4
-                product.getDescription(), // 5
-                product.getAvailability() // 6
+                product.getProductId(),
+                product.getCategory(),
+                product.getName(),
+                product.getBasePrice(),
+                product.getDescription(),
+                product.getAvailability()
         );
     }
 
     public List<ProductsDTO> getAllProducts() {
-        // the repo method returns a list of expenses...
-        // we need to convert every expense on the list to a DTO...
-        // keep/put back in a list to return
+        // the repo method returns a list of products
         return repository.findAll().stream().map(this::ProductsToDto).toList();
     }
 
     private MenuProductsDTO ProductToMenuDto(Products product) {
         return new MenuProductsDTO(
-                // Mapping Fields from Entity to DTO:
+
 
                 // 1. Category
                 product.getProductId(),
@@ -110,14 +108,12 @@ public class ProductsService {
                 // 4. Availability
                 product.getAvailability()
 
-                // Fields Omitted (e.g., productId, description, internalCost)
+
         );
     }
 
     public List<MenuProductsDTO> getAllMenuProducts() {
-        // the repo method returns a list of expenses...
-        // we need to convert every expense on the list to a DTO...
-        // keep/put back in a list to return
+        // the repo method returns a list of menu products...
         List<Products> productsList = repository.findAll();
 
         return repository.findAll().stream().map(this::ProductToMenuDto).toList();
@@ -199,7 +195,7 @@ public class ProductsService {
                     "IN_STOCK"
             );
 
-            // Use the standard JPA save() method
+
             repository.save(espresso);
 
             Products misto = new Products(

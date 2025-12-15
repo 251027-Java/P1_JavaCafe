@@ -20,19 +20,17 @@ import java.util.Optional;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-
     // Auth Records
-//    public record AuthRequest(String email, String password){}
-//    public record AuthResponse(String token){}
-
     public record AuthRequest(String email, String password){}
+
+    // RECORD: Includes all user data for the frontend
     public record AuthResponse(
             String token,
-            Long userId,
             String email,
-            String firstName, // 🚀 ADDED
-            String lastName   // 🚀 ADDED
-    ){}
+            String firstName,
+            String lastName
+
+    ) {}
 
 
     // Fields
@@ -59,66 +57,59 @@ public class AuthController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
 
-        AppUser user = optionalUser.get(); // Get the AppUser object
-        Long userId = user.getUserId(); // <--- Get the ID after the lookup
+        AppUser user = optionalUser.get();
 
         // 2. Validate the password match
+        // This throws an exception if the PasswordEncoder bean is missing.
         if(!passwordEncoder.matches(request.password(), user.getPassword())){
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid password");
         }
 
-        // 3. Generate a token WITH THE USER'S ROLE
-        // We now call the two-argument generateToken(email, userRole)
+        // 3. Generate a token
         String token = jwtUtil.generateToken(
-                userId,
-                user.getEmail(),
-                user.getUserRole()
-                // <-- CRITICAL CHANGE: Pass the role string here
-        );
-
-        // 4. Return the token
-        return new AuthResponse(
-                token,
                 user.getUserId(),
                 user.getEmail(),
-                user.getFirstName(), // 🚀 ADDED
-                user.getLastName()   // 🚀 ADDED
+                user.getUserRole()
+        );
+
+        // 4. Return the expanded response to the frontend
+        return new AuthResponse(
+                token,
+                //user.getUserId(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName()
         );
     }
 
     @PostMapping("/register")
     public AuthResponse register(@RequestBody RegisterCustomerDTO request){
         try {
-            // 1. Call the service layer to create the user, which:
-            //    - Checks for existing email.
-            //    - Hashes the password.
-            //    - HARDCODES the role to "CUSTOMER".
+            // 1. Call the service layer to create the user
             AppUserDTO user = appUserService.registerNewCustomer(request);
-            //appUserService.registerNewCustomer(request);
             Long userId = user.userId();
 
             // 2. Automatically log the user in immediately after successful registration
-            //    by generating and returning a token for the new user.
             String token = jwtUtil.generateToken(
                     userId,
                     request.email(),
-                    "CUSTOMER" // We know the role is CUSTOMER, as it was hardcoded in the service
+                    "CUSTOMER"
             );
 
-            // 3. Return the token to the frontend
+            // 3. Return the expanded response to the frontend
             return new AuthResponse(
                     token,
-                    user.userId(),
-                    user.email(),
-                    user.firstName(), // 🚀 ADDED
-                    user.lastName()   // 🚀 ADDED
+                    //userId,
+                    request.email(),
+                    request.firstName(),
+                   request.lastName()
             );
 
         } catch (IllegalArgumentException e) {
-            // Handle the specific exception thrown by AppUserService if the email exists
+            // Handle duplicate email, etc.
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         } catch (Exception e) {
-            // Handle other unexpected errors during the process
+            // Handle other unexpected errors
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Registration failed: " + e.getMessage());
         }
     }

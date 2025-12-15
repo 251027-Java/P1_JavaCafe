@@ -39,9 +39,9 @@ public class CustomerOrders {
             mappedBy = "order",
             cascade = CascadeType.ALL,
             fetch = FetchType.LAZY,
-            orphanRemoval = true // Good practice for OneToMany relationships with CascadeType.ALL
+            orphanRemoval = true // for OneToMany relationships with CascadeType.ALL
     )
-    // --- THE FIX IS HERE ---
+
     // Initialize the list to an empty ArrayList to prevent NullPointerException
     private List<OrderItems> orderItems = new ArrayList<>();
 

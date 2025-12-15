@@ -29,7 +29,7 @@ public class OrderController {
         this.productsService = productsService;
     }
 
-    // --- EXISTING: Get Products (Menu) ---
+    // Get Products (Menu) ---
     @GetMapping
     public ResponseEntity<List<ProductsDTO>> getProducts(
             @RequestParam(required = false) String categoryName
@@ -42,8 +42,8 @@ public class OrderController {
         return ResponseEntity.ok(products);
     }
 
-    // --- EXISTING: Guest Checkout ---
-    @PostMapping("/guest/submit") // Maps to: /api/cart/guest/submit
+    // Guest Checkout ---
+    @PostMapping("/guest/submit")
     public ResponseEntity<CustomerOrdersDTO> submitPublicOrder(
             @RequestBody GuestCheckoutDTO guestOrderDetails,
             HttpServletRequest request
@@ -62,7 +62,7 @@ public class OrderController {
         }
     }
 
-    // 🚀 NEW ENDPOINT: Member Checkout 🚀
+    // Member Checkout
     // This is the endpoint the React frontend is looking for after successful login.
     @PostMapping("/member/submit") // Maps to: /api/cart/member/submit
     public ResponseEntity<CustomerOrdersDTO> submitMemberOrder(
@@ -85,8 +85,8 @@ public class OrderController {
         }
 
         try {
-            // 3. Call the Order Service method, passing the DTO and the secure userId
-            // Assuming your orderService.create() is designed to handle this.
+            // 3. Call Order Service method, passing the DTO and the secure userId
+            // And orderService.create() is designed to handle this.
             CustomerOrdersDTO newOrder = orderService.create(orderDetailsDTO, userId);
 
             return new ResponseEntity<>(newOrder, HttpStatus.CREATED);
@@ -116,13 +116,13 @@ public class OrderController {
     */
 
 
-    // --- EXISTING: findOrderById ---
-    @GetMapping("/{id}") //practice RESTful path: GET /api/orders/123
+    // findOrderById ---
+    @GetMapping("/{id}") //RESTful path: GET /api/orders/123
     public ResponseEntity<CustomerOrdersSummaryDTO> getById(
             @PathVariable Integer id,
             HttpServletRequest request
     ) {
-        // ... (existing logic)
+
         String userEmail = (String) request.getAttribute("email");
         if (userEmail == null) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
@@ -136,13 +136,13 @@ public class OrderController {
         return new ResponseEntity<>(order, HttpStatus.OK);
     }
 
-    // --- EXISTING: getDetailsWithItems ---
+    // getDetailsWithItems ---
     @GetMapping("/{id}/items") // Maps to: GET /api/orders/123/items
     public ResponseEntity<CustomerOrdersDTO> getDetailsWithItems(
             @PathVariable Integer id,
             HttpServletRequest request
     ) {
-        // ... (existing logic)
+
         String userEmail = (String) request.getAttribute("email");
         if (userEmail == null) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);

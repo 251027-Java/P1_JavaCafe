@@ -29,8 +29,8 @@ public class JwtUtil {
      * @param userRole The user's role string (e.g., "ROLE_ADMIN", "ROLE_CUSTOMER").
      * @return The signed JWT string.
      */
-    // --- UPDATED METHOD SIGNATURE AND BODY ---
-    public String generateToken(Long userId, String email, String userRole){ // <-- 1. Accepts the role string
+
+    public String generateToken(Long userId, String email, String userRole){ // 1. Accepts the role string
 
         Map<String, Object> claims = new HashMap<>();
 
@@ -41,17 +41,18 @@ public class JwtUtil {
 
 
 
+
         return Jwts.builder()
-                .claims(claims) // <-- 3. Include the claims map
+                .claims(claims) // 3. Include the claims map
                 .subject(email)
                 .issuedAt( new Date())
                 .expiration(new Date(System.currentTimeMillis() + (expiration * 1000)))
                 .signWith(key)
                 .compact();
     }
-    // ----------------------------------------
 
-    // The original single-argument generateToken method is removed.
+
+
 
     public boolean validateToken(String token) {
         try {

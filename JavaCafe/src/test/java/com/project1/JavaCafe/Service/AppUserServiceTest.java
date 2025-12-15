@@ -95,7 +95,7 @@ class AppUserServiceTest {
     }
 
     // ------------------------------------------------------------------
-    // 🔑 NEW TESTS: Testing getUserIdAfterLogin
+    // Testing getUserIdAfterLogin
     // ------------------------------------------------------------------
 
     @Test

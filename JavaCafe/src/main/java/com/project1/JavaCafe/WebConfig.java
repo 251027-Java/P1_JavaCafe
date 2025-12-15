@@ -20,21 +20,20 @@ public class WebConfig implements WebMvcConfigurer {
         // adding interceptors to the list of active/running interceptors
         // that are scanning requests as they come in
         reg.addInterceptor(jwtInterceptor)
-                .addPathPatterns("/api/**") // Apply to all /api/ paths
+                .addPathPatterns("/api/**")
 
-                // EXCLUSIONS: Allow these paths without a token
+                // EXCLUSIONS: wildcard for /api/auth path
                 .excludePathPatterns(
+                        // USE for ROBUST EXCLUSION
+                        "/api/auth/**",
+
                         "/api",
-                        "/api/auth/login",
-                        "/api/auth/register",
                         "/api/menu",
                         "/api/menu/**",
                         "/api/contact",
                         "/api/contact/**",
                         "/api/cart",
-
-                        // *** 🔑 CRITICAL FIX: EXCLUDE GUEST ORDER SUBMISSION 🔑 ***
-                        "/api/cart/guest/submit" // <-- ADD THIS LINE
+                        "/api/cart/guest/submit"
                 );
     }
 

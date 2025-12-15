@@ -41,7 +41,7 @@ public class CustomerOrdersService {
 
     public CustomerOrdersDTO createGuestOrder(GuestCheckoutDTO guestOrder) {
 
-        // 1. FIND OR CREATE AppUser ENTRY (The FIX for returning guests)
+        // 1. FIND OR CREATE AppUser ENTRY (works for returning guests)
 
         // Attempt to find an existing user (guest or member) with the provided email.
         AppUser user = ARepo.findByEmail(guestOrder.email())
@@ -61,7 +61,7 @@ public class CustomerOrdersService {
 
         // The 'user' variable now holds the AppUser entity, whether it was found or created.
 
-        // 2. CALCULATE AND CREATE OrderItems (This block remains UNCHANGED)
+        // 2. CALCULATE AND CREATE OrderItems
 
         BigDecimal calculatedTotalCost = BigDecimal.ZERO;
         List<OrderItems> orderItemsToSave = new ArrayList<>();
@@ -91,7 +91,7 @@ public class CustomerOrdersService {
 
         // Create the main Order
         CustomerOrders order = new CustomerOrders(
-                user, // 🎯 Now linked to the found or newly created 'user' object
+                user,
                 calculatedTotalCost,
                 LocalDate.now(),
                 "Confirmed"
@@ -111,14 +111,14 @@ public class CustomerOrdersService {
 
 
 
-    // 🚀 MEMBER ORDER CREATION 🚀
+    // MEMBER ORDER CREATION
     public CustomerOrdersDTO create(CustomerOrdersWOIDDTO dto, Long userId) {
 
-        // 1. Fetch AppUser (Unchanged)
+        // 1. Fetch AppUser
         AppUser user = ARepo.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
 
-        // CRITICAL FIX: Ensure the items list exists before processing (Passed previous check)
+        // Ensure the items list exists before processing (Passed previous check)
         if (dto.items() == null || dto.items().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Order must contain items.");
         }
@@ -129,7 +129,7 @@ public class CustomerOrdersService {
         // 2. Calculate and Create OrderItems
         for (OrderItemsWOIDDTO itemDto : dto.items()) {
 
-            // 🔑 NEW FIX: Null check for quantity
+            // Null check for quantity
             if (itemDto.quantity() == null || itemDto.quantity() <= 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Item quantity is missing or invalid for product ID: " + itemDto.productId());
             }
@@ -152,8 +152,8 @@ public class CustomerOrdersService {
             orderItemsToSave.add(item);
         }
 
-        // 3. Create the CustomerOrders entity (Unchanged)
-        String DEFAULT_STATUS = "PENDING";
+        // 3. Create the CustomerOrders entity
+        String DEFAULT_STATUS = "Confirmed";
         LocalDate creationDate = LocalDate.now();
 
         CustomerOrders order = new CustomerOrders(
@@ -169,7 +169,7 @@ public class CustomerOrdersService {
         order.setOrderItems(orderItemsToSave);
 
 
-        // 4. Save the parent entity ONLY. (Unchanged)
+        // 4. Save the parent entity ONLY.
         CustomerOrders savedOrder = CRepo.save(order);
 
 
@@ -263,7 +263,7 @@ public class CustomerOrdersService {
 
     public CustomerOrdersSummaryDTO getByIdAndUserId(Integer orderId, Long userId) {
 
-        // 1. Secure Database Lookup: Enforces Horizontal Access Control
+        // 1. Secure Database Lookup - Enforces Horizontal Access Control
         // CRepo.findByOrderIdAndAppUserId requires BOTH the requested Order ID
         // and the User ID extracted from the authenticated JWT token.
         Optional<CustomerOrders> order = CRepo.findByOrderIdAndUser_UserId(orderId, userId);
@@ -274,7 +274,7 @@ public class CustomerOrdersService {
         }
 
         // 2. Successful Path: Convert Model to DTO and return
-        // We can safely call .get() because we checked order.isEmpty() above.
+        // Can safely call .get() because after checking order.isEmpty()
         return orderToSummaryDto(order.get());
     }
 
@@ -290,8 +290,8 @@ public class CustomerOrdersService {
             return null;
         }
 
-        // 2. Successful Path: Convert Model to DTO and return
-        // We can safely call .get() because we checked order.isEmpty() above.
+        // 2. Successful: Convert Model to DTO and return
+        // Can safely call .get() because after checking order.isEmpty()
         return orderToDetailDto(order.get());
     }
 

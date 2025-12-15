@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/menu") // domain:port/api/expenses
+@RequestMapping("/api/menu") // domain:port/api/menu
 public class MenuController {
     // Fields
     private final ProductsService Pservice;

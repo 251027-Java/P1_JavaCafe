@@ -19,7 +19,7 @@ public class JwtInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
-        // 🔑 CRITICAL FIX: Allow CORS preflight requests (OPTIONS method) to pass immediately
+        // Allow CORS preflight requests (OPTIONS method) to pass immediately
         // The framework's CORS filter will handle the headers and status for these requests.
         if (request.getMethod().equalsIgnoreCase("OPTIONS")) {
             return true;
@@ -33,7 +33,7 @@ public class JwtInterceptor implements HandlerInterceptor {
             response.getWriter().write("Unauthorized: Missing or invalid token format.");
             return false;
         }
-        // ... (rest of the logic remains the same)
+
 
         String token = authHeader.substring(7);
 
@@ -57,7 +57,8 @@ public class JwtInterceptor implements HandlerInterceptor {
 
         // 3. Manual Authorization Logic (Centralized Role Check)
 
-        // Rule: RESTRICT /api/admin/** to ROLE_ADMIN only.
+        // No longer needed
+        // RESTRICT /api/admin/** to ROLE_ADMIN only.
         if (requestUri.startsWith("/api/admin")) {
             if (!"ADMIN".equals(userRole)) {
                 // Deny access: User is authenticated but not authorized for this resource
