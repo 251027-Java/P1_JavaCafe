@@ -30,7 +30,7 @@ const mockProducts = [
     { productId: 31, category: 'CROISSANTS', name: 'Classic Butter Croissant', basePrice: 3.75, availability: 'IN_STOCK' },
     { productId: 32, category: 'CROISSANTS', name: 'Cinnamon Swirl Croissant', basePrice: 4.50, availability: 'IN_STOCK' },
     { productId: 33, category: 'CROISSANTS', name: 'Chocolate Almond Croissant', basePrice: 4.75, availability: 'IN_STOCK' },
-    { productId: 34, category: 'CROISSANTS', name: 'Butter Croissant', basePrice: 3.50, availability: 'IN_STOCK' },
+    { productId: 34, category: 'CROISSANTS', name: 'Plain Croissant', basePrice: 3.50, availability: 'IN_STOCK' },
     { productId: 35, category: 'CROISSANTS', name: 'Ham and Cheese Croissant', basePrice: 5.00, availability: 'IN_STOCK' },
     
     // PASTRIES

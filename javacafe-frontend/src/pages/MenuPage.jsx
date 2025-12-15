@@ -27,7 +27,7 @@ const mockProducts = [
     { productId: 31, category: 'CROISSANTS', name: 'Classic Butter Croissant', basePrice: 3.75, availability: 'IN_STOCK' },
     { productId: 32, category: 'CROISSANTS', name: 'Cinnamon Swirl Croissant', basePrice: 4.50, availability: 'IN_STOCK' },
     { productId: 33, category: 'CROISSANTS', name: 'Chocolate Almond Croissant', basePrice: 4.75, availability: 'IN_STOCK' },
-    { productId: 34, category: 'CROISSANTS', name: 'Butter Croissant', basePrice: 3.50, availability: 'IN_STOCK' },
+    { productId: 34, category: 'CROISSANTS', name: 'Plain Croissant', basePrice: 3.50, availability: 'IN_STOCK' },
     { productId: 35, category: 'CROISSANTS', name: 'Ham and Cheese Croissant', basePrice: 5.00, availability: 'IN_STOCK' },
     
     // PASTRIES
@@ -193,16 +193,16 @@ function MenuPage() {
                                                 {/* Product Image Box */}
                                                 <div 
                                                     onClick={() => navigate(`/api/menu/product/${product.productId}`)}
-                                                    className="w-full h-48 bg-amber-100 rounded-lg mb-4 flex items-center justify-center overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+                                                    className="w-full h-48 bg-amber-100 rounded-lg mb-4 flex items-center justify-center overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-amber-200/50"
                                                 >
                                                     {productImage ? (
                                                         <img 
                                                             src={productImage} 
                                                             alt={product.name}
-                                                            className="w-full h-full object-cover"
+                                                            className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
                                                         />
                                                     ) : (
-                                                        <div className="text-amber-400 text-4xl">☕</div>
+                                                        <div className="text-amber-400 text-4xl transition-transform duration-300 hover:scale-110">☕</div>
                                                     )}
                                                 </div>
                                                 <h4 className="text-xl font-semibold text-amber-900 mb-2">
@@ -241,16 +241,16 @@ function MenuPage() {
                                             {/* Product Image Box */}
                                             <div 
                                                 onClick={() => navigate(`/api/menu/product/${product.productId}`)}
-                                                className="w-full h-48 bg-amber-100 rounded-lg mb-4 flex items-center justify-center overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+                                                className="w-full h-48 bg-amber-100 rounded-lg mb-4 flex items-center justify-center overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-amber-200/50"
                                             >
                                                 {productImage ? (
                                                     <img 
                                                         src={productImage} 
                                                         alt={product.name}
-                                                        className="w-full h-full object-cover"
+                                                        className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
                                                     />
                                                 ) : (
-                                                    <div className="text-amber-400 text-4xl">☕</div>
+                                                    <div className="text-amber-400 text-4xl transition-transform duration-300 hover:scale-110">☕</div>
                                                 )}
                                             </div>
                                             <h4 className="text-xl font-semibold text-amber-900 mb-2">
