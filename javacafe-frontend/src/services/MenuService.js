@@ -1,9 +1,17 @@
 export const getMenuProducts = async () => {
-    const response = await fetch('/api/menu');
-    if (!response.ok) {
-        throw new Error('Failed to fetch menu products');
+    try {
+        const response = await fetch('/api/menu');
+        if (!response.ok) {
+            const errorText = await response.text().catch(() => 'Unknown error');
+            throw new Error(`Failed to fetch menu products: ${response.status} ${response.statusText} - ${errorText}`);
+        }
+        return response.json();
+    } catch (error) {
+        if (error.message.includes('fetch')) {
+            throw new Error('Network error: Unable to connect to backend. Make sure the Spring Boot server is running on port 8080.');
+        }
+        throw error;
     }
-    return response.json();
 };
 
 export const getProductDescription = async (productId) => {

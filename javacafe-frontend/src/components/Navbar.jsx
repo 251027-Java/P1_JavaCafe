@@ -85,12 +85,6 @@ function Navbar() {
                         Menu
                     </Link>
                     <Link 
-                        to="/api/cart" 
-                        className="hover:text-amber-200 transition-colors duration-200 px-3 py-2 rounded"
-                    >
-                        Cart
-                    </Link>
-                    <Link 
                         to="/api/contact-us" 
                         className="hover:text-amber-200 transition-colors duration-200 px-3 py-2 rounded"
                     >
