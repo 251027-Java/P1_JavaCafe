@@ -79,7 +79,6 @@ function ProductDetailPage() {
             setError(null);
 
             try {
-                // Try to fetch from API first
                 let products = null;
                 try {
                     const response = await fetch('/api/menu');
@@ -90,7 +89,6 @@ function ProductDetailPage() {
                     console.log("API not available, using mock data");
                 }
 
-                // Fall back to mock data if API fails
                 if (!products || products.length === 0) {
                     products = mockProducts;
                 }
@@ -103,18 +101,15 @@ function ProductDetailPage() {
                 
                 setProduct(foundProduct);
 
-                // Try to fetch description from API, but don't fail if it doesn't work
                 try {
                     const detailsResponse = await fetch(`/api/menu/description/${productId}`);
                     if (detailsResponse.ok) {
                         const details = await detailsResponse.json();
                         setProductDetails(details);
                     } else {
-                        // Set a default description if API fails
                         setProductDetails({ description: `Delicious ${foundProduct.name} - a perfect choice for any time of day.` });
                     }
                 } catch (descError) {
-                    // Set a default description if API fails
                     setProductDetails({ description: `Delicious ${foundProduct.name} - a perfect choice for any time of day.` });
                 }
             } catch (e) {
@@ -159,9 +154,7 @@ function ProductDetailPage() {
         setAddToCartMessage(`${quantity} ${product.name}(s) added to cart!`);
         setItemAdded(true);
         
-        // Trigger storage event to update cart count in other components
         window.dispatchEvent(new Event('storage'));
-        // Also trigger custom event for same-tab updates
         window.dispatchEvent(new Event('cartUpdated'));
         
         setTimeout(() => {
