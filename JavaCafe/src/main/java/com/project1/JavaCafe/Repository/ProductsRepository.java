@@ -9,7 +9,7 @@ public interface ProductsRepository extends JpaRepository<Products, Long> {
     // Returns the entire Products entity when searching by name
     //public Products findByName(String name);
 
-    // (Optional: If you only need the ID, keep this, but fix the return type if it's not Integer)
+    // need the ID for this
     //public Products findProductIdByName(String name);
 
     List<Products> findByCategory(String categoryName);

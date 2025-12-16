@@ -106,7 +106,7 @@ public class OrderController {
     }
 
     //findOrderById
-    @GetMapping("/{id}") //practice RESTful path: GET /api/orders/123
+    @GetMapping("/{id}") //RESTful path: GET /api/orders/123
     public ResponseEntity<CustomerOrdersSummaryDTO> getById(
             @PathVariable Integer id, // Corrected type: Use Long for Order ID
             HttpServletRequest request // Required to securely get the user's identity
@@ -150,8 +150,8 @@ public class OrderController {
         }
         Long userId = appService.getUserIdAfterLogin(userEmail);
 
-        // 2. Call the NEW service method designed for detailed retrieval
-        // Note: The service layer MUST ensure this call eagerly loads the OrderItems.
+        // 2. Call the service method designed for detailed retrieval
+        // The service layer MUST ensure this call eagerly loads the OrderItems.
         CustomerOrdersDTO details = orderService.getDetailsWithItems(id, userId);
 
         if (details == null) {

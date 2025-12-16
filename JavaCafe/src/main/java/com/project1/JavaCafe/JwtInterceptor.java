@@ -60,7 +60,7 @@ public class JwtInterceptor implements HandlerInterceptor {
             }
         }
 
-        // Rule: Optional check for /api/orders (requires any authenticated user with a valid role)
+        // check for /api/orders (requires any authenticated user with a valid role)
         // Since the token is valid, this check is primarily to ensure the role is either
         // ADMIN or CUSTOMER, which should be redundant if your tokens are always correct.
         if (requestUri.startsWith("/api/orders")) {

@@ -30,8 +30,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api/menu/**",
                         "/api/contact",
                         "/api/contact/**",
-                        "/api/cart"
-                        ,"/api/cart/guest/submit/"
+                        "/api/cart",
+                        "/api/cart/guest/submit"
                 );
     }
 
