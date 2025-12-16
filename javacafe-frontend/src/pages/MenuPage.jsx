@@ -100,10 +100,10 @@ function MenuPage() {
                 <div className="max-w-7xl mx-auto">
                     <div className="flex justify-between items-center mb-8">
                         <div>
-                            <h1 className="text-4xl font-bold text-amber-900 mb-2">Menu</h1>
+                    <h1 className="text-4xl font-bold text-amber-900 mb-2">Menu</h1>
                             <h2 className="text-2xl font-bold text-amber-800">
-                                {selectedCategory ? formatCategoryName(selectedCategory) : 'All Categories'}
-                            </h2>
+                        {selectedCategory ? formatCategoryName(selectedCategory) : 'All Categories'}
+                    </h2>
                         </div>
                         {/* Search Bar */}
                         <div className="relative w-80">
@@ -175,15 +175,15 @@ function MenuPage() {
                                     {productsByCategory[category].map((product) => {
                                         const productImage = getProductImage(product.name, product.category);
                                         return (
-                                            <div 
-                                                key={product.productId} 
+                                        <div 
+                                            key={product.productId} 
                                                 className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
                                             >
                                                 {/* Product Image Box */}
                                                 <div 
                                                     onClick={() => navigate(`/api/menu/product/${product.productId}`)}
                                                     className="w-full h-48 bg-amber-100 rounded-lg mb-4 flex items-center justify-center overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-amber-200/50"
-                                                >
+                                        >
                                                     {productImage ? (
                                                         <img 
                                                             src={productImage} 
@@ -194,54 +194,6 @@ function MenuPage() {
                                                         <div className="text-amber-400 text-4xl transition-transform duration-300 hover:scale-110">☕</div>
                                                     )}
                                                 </div>
-                                                <h4 className="text-xl font-semibold text-amber-900 mb-2">
-                                                    {product.name}
-                                                </h4>
-                                                <p className="text-2xl font-bold text-amber-700 mb-2">
-                                                    ${typeof product.basePrice === 'number' 
-                                                        ? product.basePrice.toFixed(2) 
-                                                        : parseFloat(product.basePrice || 0).toFixed(2)}
-                                                </p>
-                                                {product.availability && (
-                                                    <p className={`text-sm ${
-                                                        product.availability === 'IN_STOCK' 
-                                                            ? 'text-green-600' 
-                                                            : 'text-red-600'
-                                                    }`}>
-                                                        {product.availability === 'IN_STOCK' ? 'In Stock' : 'Out of Stock'}
-                                                    </p>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        ))
-                    ) : (
-                        <div className="mb-12">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                {productsByCategory[selectedCategory]?.map((product) => {
-                                    const productImage = getProductImage(product.name, product.category);
-                                    return (
-                                        <div 
-                                            key={product.productId} 
-                                            className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
-                                        >
-                                            {/* Product Image Box */}
-                                            <div 
-                                                onClick={() => navigate(`/api/menu/product/${product.productId}`)}
-                                                className="w-full h-48 bg-amber-100 rounded-lg mb-4 flex items-center justify-center overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-amber-200/50"
-                                            >
-                                                {productImage ? (
-                                                    <img 
-                                                        src={productImage} 
-                                                        alt={product.name}
-                                                        className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
-                                                    />
-                                                ) : (
-                                                    <div className="text-amber-400 text-4xl transition-transform duration-300 hover:scale-110">☕</div>
-                                                )}
-                                            </div>
                                             <h4 className="text-xl font-semibold text-amber-900 mb-2">
                                                 {product.name}
                                             </h4>
@@ -260,6 +212,54 @@ function MenuPage() {
                                                 </p>
                                             )}
                                         </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="mb-12">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                {productsByCategory[selectedCategory]?.map((product) => {
+                                    const productImage = getProductImage(product.name, product.category);
+                                    return (
+                                    <div 
+                                        key={product.productId} 
+                                            className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+                                        >
+                                            {/* Product Image Box */}
+                                            <div 
+                                                onClick={() => navigate(`/api/menu/product/${product.productId}`)}
+                                                className="w-full h-48 bg-amber-100 rounded-lg mb-4 flex items-center justify-center overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-amber-200/50"
+                                    >
+                                                {productImage ? (
+                                                    <img 
+                                                        src={productImage} 
+                                                        alt={product.name}
+                                                        className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
+                                                    />
+                                                ) : (
+                                                    <div className="text-amber-400 text-4xl transition-transform duration-300 hover:scale-110">☕</div>
+                                                )}
+                                            </div>
+                                        <h4 className="text-xl font-semibold text-amber-900 mb-2">
+                                            {product.name}
+                                        </h4>
+                                        <p className="text-2xl font-bold text-amber-700 mb-2">
+                                            ${typeof product.basePrice === 'number' 
+                                                ? product.basePrice.toFixed(2) 
+                                                : parseFloat(product.basePrice || 0).toFixed(2)}
+                                        </p>
+                                        {product.availability && (
+                                            <p className={`text-sm ${
+                                                product.availability === 'IN_STOCK' 
+                                                    ? 'text-green-600' 
+                                                    : 'text-red-600'
+                                            }`}>
+                                                {product.availability === 'IN_STOCK' ? 'In Stock' : 'Out of Stock'}
+                                            </p>
+                                        )}
+                                    </div>
                                     );
                                 })}
                             </div>

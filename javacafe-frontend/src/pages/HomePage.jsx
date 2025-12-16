@@ -1,9 +1,16 @@
+import { useState, useEffect } from 'react';
 import FeaturedItem from '../components/FeaturedItem';
 import Announcement from '../components/Announcement';
 import { Link } from 'react-router-dom';
+import { getMenuProducts, getProductDescription } from '../services/MenuService';
+import { getProductImage } from '../assets/images/imageMap';
+import Snowfall from '../components/Snowfall';
 
 function HomePage() {
-    // Announcements data
+    const [featuredItems, setFeaturedItems] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
     const announcements = [
         {
             id: 1,
@@ -20,65 +27,102 @@ function HomePage() {
         {
             id: 3,
             image: 'https://plus.unsplash.com/premium_vector-1720532759341-feb0cfea424d?w=352&dpr=2&h=367&auto=format&fit=crop&q=60&ixlib=rb-4.1.0',
-            title: 'Java Café’s 25 Days of Cheer!',
-            description: 'All season long, we’re picking 3 guests each day to win a free drink or sweet treat. Stop in, enjoy the festive atmosphere, and you might leave with a little extra Christmas joy!'
-        }
-    ];
-    // Sample featured items data - you can replace this with data from an API
-    const featuredItems = [
-        {
-            id: 1,
-            image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=300&fit=crop',
-            title: 'Chocalate Cake',
-            description: 'Delicious, moist chocalate cake with chocalate chips inside. ',
-            linkText: 'View Cakes',
-            linkTo: '/api/menu'
-        },
-        {
-            id: 2,
-            image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=400&h=300&fit=crop',
-            title: 'Butter Croissant',
-            description: 'Flaky, buttery croissant with golden layers that melt in your mouth. Baked fresh daily to perfection with a crispy exterior and soft, airy interior. ',
-            linkText: 'View Croissants',
-            linkTo: '/api/menu'
-        },
-        {
-            id: 3,
-            image: 'https://www.simplytrinicooking.com/wp-content/uploads/red-velvet-cake-500x500.jpg',
-            title: 'Red Velvet Cake',
-            description: 'Our version has a dramatic vibrant red color, velvety-soft texture, and unique sweet-and-tangy flavor profile. Paired with a rich, white cream cheese frosting. ',
-            linkText: 'View Cakes',
-            linkTo: '/api/menu'
-        },
-        {
-            id: 4,
-            image: 'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=400&h=300&fit=crop',
-            title: 'Chocalate Chip Cookies',
-            description: 'Cookies with a rich, buttery, vanilla-flavored dough base with both chocolate chips AND chunks, which soften into melty pockets during baking. ',
-            linkText: 'View Cookies',
-            linkTo: '/api/menu'
-        },
-        {
-            id: 5,
-            image: 'https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=400&h=300&fit=crop',
-            title: 'Blueberry Muffin',
-            description: 'Sweet, soft baked treat with a moist, fluffy crumb, studded with juicy, sweet-tart blueberries that burst with flavor, topped with a sugary crust for a delightful contrast in textures. ',
-            linkText: 'View Muffins',
-            linkTo: '/api/menu'
-        },
-        {
-            id: 6,
-            image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR5yovUHhG2rFJES4xSlgu8FGSjb9xOdmYcOg&s',
-            title: 'Mocha',
-            description: 'Espresso-based drink that combines espresso, chocolate syrup or cocoa powder, and steamed milk. ',
-            linkText: 'View Drinks',
-            linkTo: '/api/menu'
+            title: 'Java Café\'s 25 Days of Cheer!',
+            description: 'All season long, we\'re picking 3 guests each day to win a free drink or sweet treat. Stop in, enjoy the festive atmosphere, and you might leave with a little extra Christmas joy!'
         }
     ];
 
+    useEffect(() => {
+        const fetchFeaturedProducts = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const products = await getMenuProducts();
+                
+                const availableProducts = products.filter(p => p.availability === 'IN_STOCK');
+                
+                if (availableProducts.length === 0) {
+                    setError('No products available at the moment.');
+                    setFeaturedItems([]);
+                    setLoading(false);
+                    return;
+                }
+                
+                const categories = ['COFFEE', 'CROISSANTS', 'COOKIES', 'CUPCAKES', 'PASTRIES', 'SMOOTHIES'];
+                const selectedProducts = [];
+                
+                categories.forEach(category => {
+                    const categoryProducts = availableProducts.filter(p => p.category === category);
+                    if (categoryProducts.length > 0) {
+                        const productWithImage = categoryProducts.find(p => 
+                            getProductImage(p.name, p.category) !== null
+                        );
+                        selectedProducts.push(productWithImage || categoryProducts[0]);
+                    }
+                });
+                
+                if (selectedProducts.length < 6) {
+                    const remainingProducts = availableProducts.filter(p => 
+                        !selectedProducts.some(sp => sp.productId === p.productId)
+                    );
+                    const withImages = remainingProducts.filter(p => 
+                        getProductImage(p.name, p.category) !== null
+                    );
+                    const withoutImages = remainingProducts.filter(p => 
+                        getProductImage(p.name, p.category) === null
+                    );
+                    
+                    selectedProducts.push(...withImages.slice(0, 6 - selectedProducts.length));
+                    if (selectedProducts.length < 6) {
+                        selectedProducts.push(...withoutImages.slice(0, 6 - selectedProducts.length));
+                    }
+                }
+                
+                const featuredPromises = selectedProducts.slice(0, 6).map(async (product) => {
+                    let description = `Delicious ${product.name.toLowerCase()} from our ${product.category.toLowerCase()} collection.`;
+                    
+                    try {
+                        const descData = await getProductDescription(product.productId);
+                        if (descData && descData.description) {
+                            description = descData.description;
+                        }
+                    } catch (err) {
+                        console.warn(`Could not fetch description for product ${product.productId}:`, err);
+                    }
+                    
+                    const productImage = getProductImage(product.name, product.category);
+                    
+                    return {
+                        id: product.productId,
+                        productId: product.productId,
+                        name: product.name,
+                        category: product.category,
+                        description: description,
+                        price: product.basePrice,
+                        image: productImage,
+                        linkTo: `/api/menu/product/${product.productId}`
+                    };
+                });
+                
+                const featured = await Promise.all(featuredPromises);
+                setFeaturedItems(featured);
+            } catch (err) {
+                console.error('Error fetching featured products:', err);
+                setError('Failed to load featured items. Please try again later.');
+                setFeaturedItems([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchFeaturedProducts();
+    }, []);
+
     return (
-        <div>
-            <div className="bg-yellow-700 text-white py-3 shadow-md mb-6">
+        <div className="relative min-h-screen">
+            {/* Snowfall Effect */}
+            <Snowfall />
+            <div className="bg-yellow-700 text-white py-3 shadow-md mb-6 relative z-10">
                 <div className="container mx-auto px-4">
                     <p className="text-center text-lg font-medium">
                         Serving Fresh Coffee, Not Runtime Errors
@@ -86,7 +130,7 @@ function HomePage() {
                 </div>
             </div>
 
-            <section className="mb-12">
+            <section className="mb-12 relative z-10">
                     <div className="max-w-5xl mx-auto">
                         {announcements.map((announcement, index) => (
                             <Announcement 
@@ -98,16 +142,33 @@ function HomePage() {
                     </div>
                 </section>
 
-            <div className="container mx-auto px-4 py-8">
+            <div className="container mx-auto px-4 py-8 relative z-10">
                 <section className="mb-12">
                     <h2 className="text-3xl font-bold text-amber-900 text-center mb-8">
                         Featured Items
                     </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {featuredItems.map((item) => (
-                            <FeaturedItem key={item.id} item={item} />
-                        ))}
-                    </div>
+                    {loading && (
+                        <div className="text-center py-8">
+                            <p className="text-amber-700">Loading featured items...</p>
+                        </div>
+                    )}
+                    {error && (
+                        <div className="text-center py-8">
+                            <p className="text-red-600">{error}</p>
+                        </div>
+                    )}
+                    {!loading && !error && featuredItems.length === 0 && (
+                        <div className="text-center py-8">
+                            <p className="text-gray-600">No featured items available at the moment.</p>
+                        </div>
+                    )}
+                    {!loading && !error && featuredItems.length > 0 && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {featuredItems.map((item) => (
+                                <FeaturedItem key={item.id} item={item} />
+                            ))}
+                        </div>
+                    )}
                 </section>
                 
                 <div className="flex justify-center mt-12 mb-8">

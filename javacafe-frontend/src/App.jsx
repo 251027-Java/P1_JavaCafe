@@ -5,6 +5,7 @@ import MenuPage from './pages/MenuPage';
 import ContactPage from './pages/ContactPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import CartPage from './pages/CartPage';
+import LoginPage from './pages/LoginPage';
 
 function App() {
     return (
@@ -19,6 +20,7 @@ function App() {
                     <Route path="/api/menu/product/:productId" element={<ProductDetailPage />} />
                     <Route path="/api/cart" element={<CartPage />} />
                     <Route path="/api/contact-us" element={<ContactPage />} />
+                    <Route path="/api/login" element={<LoginPage />} />
                 </Routes>
 
             </div>
