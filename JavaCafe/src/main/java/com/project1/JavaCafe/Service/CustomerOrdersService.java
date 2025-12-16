@@ -15,17 +15,17 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;   // Ensure this import is present
-import java.util.List;        // Ensure this import is present
+import java.util.ArrayList;   
+import java.util.List;       
 import java.util.Optional;
-import java.util.stream.Collectors; // <-- NEW Import
+import java.util.stream.Collectors;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;   // Ensure this import is present
-import java.util.List;        // Ensure this import is present
+import java.util.ArrayList;   
+import java.util.List;        
 import java.util.Optional;
-import java.util.stream.Collectors; // <-- NEW Import
+import java.util.stream.Collectors; 
 
 @Service
 public class CustomerOrdersService {
