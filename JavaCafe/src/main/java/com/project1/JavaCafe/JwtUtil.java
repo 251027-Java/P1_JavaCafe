@@ -49,7 +49,7 @@ public class JwtUtil {
     }
     // ----------------------------------------
 
-    // The original single-argument generateToken method is removed.
+   
 
     public boolean validateToken(String token) {
         try {
