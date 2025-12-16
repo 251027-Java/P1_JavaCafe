@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
  * This DTO represents the data stored in the SalesSummary entity.
  */
 public record SalesSummaryDTO(
-        Long summaryId, // Include ID, useful for reporting tools or identifying the record
+        Long summaryId, 
         LocalDateTime date,
         int totalOrders,
         int totalItemsSold
