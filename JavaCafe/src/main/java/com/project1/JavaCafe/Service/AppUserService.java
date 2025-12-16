@@ -30,12 +30,12 @@ public class AppUserService {
 
     private AppUserDTO AppUserToDto(AppUser user) {
         return new AppUserDTO(
-                user.getUserId(),   // 1
-                user.getEmail(),    // 2
-                user.getPassword(),        // 3
-                user.getUserRole(),   // 4
-                user.getFirstName(), // 5
-                user.getLastName() // 6
+                user.getUserId(),   
+                user.getEmail(),    
+                user.getPassword(),        
+                user.getUserRole(),   
+                user.getFirstName(), 
+                user.getLastName() /
         );
     }
 
@@ -52,7 +52,7 @@ public class AppUserService {
         AppUser user = new AppUser(
                 dto.email(),
                 hashedPassword,
-                "CUSTOMER", // ROLE HARDCODED BY THE SERVER - SECURE!
+                "CUSTOMER", // ROLE HARDCODED BY THE SERVER
                 dto.firstName(),
                 dto.lastName()
         );
@@ -79,7 +79,7 @@ public class AppUserService {
         }
     }
 
-    // Renamed and secured method for user registration
+    // Secured method for user registration
     public AppUserDTO registerNewCustomer(AppUserWOIDDTO dto) {
         // 1. Business Logic: Check if email already exists
         if (repository.findByEmail(dto.email()).isPresent()) {
