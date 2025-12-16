@@ -11,13 +11,14 @@ function CartPage() {
     const [checkoutMode, setCheckoutMode] = useState(null); // 'guest' or 'login'
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [token, setToken] = useState(null);
+    const [loginSuccess, setLoginSuccess] = useState(false);
     
-    // Guest checkout form state
+    // Guest checkout
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
     
-    // Login checkout form state
+    // Login checkout
     const [loginEmail, setLoginEmail] = useState('');
     const [loginPassword, setLoginPassword] = useState('');
 
@@ -39,6 +40,20 @@ function CartPage() {
                 setCart([]);
             }
         }
+
+        const handleLogin = () => {
+            const token = localStorage.getItem('token');
+            if (token) {
+                setToken(token);
+                setIsLoggedIn(true);
+            }
+        };
+
+        window.addEventListener('userLoggedIn', handleLogin);
+
+        return () => {
+            window.removeEventListener('userLoggedIn', handleLogin);
+        };
     }, []);
 
     const updateQuantity = (id, delta) => {
@@ -46,7 +61,7 @@ function CartPage() {
             if (item.id === id) {
                 const newQuantity = Math.max(0, (item.quantity || 0) + delta);
                 if (newQuantity === 0) {
-                    return null; // Mark for removal
+                    return null;
                 }
                 return { ...item, quantity: newQuantity };
             }
@@ -104,8 +119,20 @@ function CartPage() {
             setToken(newToken);
             setIsLoggedIn(true);
             localStorage.setItem('token', newToken);
-            setCheckoutMode(null);
+            
+            window.dispatchEvent(new Event('userLoggedIn'));
+            
+            setLoginEmail('');
+            setLoginPassword('');
+            
+            setLoginSuccess(true);
             setError(null);
+            
+            setCheckoutMode(null);
+            
+            setTimeout(() => {
+                setLoginSuccess(false);
+            }, 3000);
         } catch (e) {
             console.error('Login error:', e);
             setError(e.message || 'Failed to login. Please try again.');
@@ -285,6 +312,12 @@ function CartPage() {
             {error && (
                 <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
                     {error}
+                </div>
+            )}
+
+            {loginSuccess && (
+                <div className="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                    Login successful! You can now proceed to checkout.
                 </div>
             )}
 
