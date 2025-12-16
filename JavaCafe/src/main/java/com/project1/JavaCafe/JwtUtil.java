@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.HashMap; // NEW: Needed to create claims map
-import java.util.Map;     // NEW: Needed for Map interface
+import java.util.HashMap; 
+import java.util.Map;     
 
 @Component
 public class JwtUtil {
@@ -29,7 +29,7 @@ public class JwtUtil {
      * @param userRole The user's role string (e.g., "ROLE_ADMIN", "ROLE_CUSTOMER").
      * @return The signed JWT string.
      */
-    // --- UPDATED METHOD SIGNATURE AND BODY ---
+    // --- METHOD SIGNATURE AND BODY ---
     public String generateToken(Long userId, String email, String userRole){ // <-- 1. Accepts the role string
 
         Map<String, Object> claims = new HashMap<>();
