@@ -61,7 +61,7 @@ public class AuthController {
         String token = jwtUtil.generateToken(
                 userId,
                 user.getEmail(),
-                user.getUserRole() // <-- CRITICAL CHANGE: Pass the role string here
+                user.getUserRole() // <-- Pass the role string here
         );
 
         // 4. Return the token
