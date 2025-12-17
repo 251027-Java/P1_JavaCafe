@@ -25,7 +25,7 @@ public class JavaCafeApplication {
 		SpringApplication.run(JavaCafeApplication.class, args);
 	}
 
-    //  NEW: Define PasswordEncoder Bean
+    //  Define PasswordEncoder Bean
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
