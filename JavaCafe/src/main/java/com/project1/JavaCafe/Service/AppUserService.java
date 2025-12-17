@@ -35,7 +35,7 @@ public class AppUserService {
                 user.getPassword(),        
                 user.getUserRole(),   
                 user.getFirstName(), 
-                user.getLastName() /
+                user.getLastName()
         );
     }
 
